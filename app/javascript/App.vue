@@ -1,18 +1,19 @@
 <template>
-  <div class="search">
-    <v-text-field type="text" v-model="keyword" label="検索"></v-text-field>
-  </div>
+
   <Suspense>
     <ScatterChart />
   </Suspense>
+  
+  <Search />
 </template>
 
 <script>
 import ScatterChart from './src/scatterChart'
+import Search from './Search'
 export default {
   name: 'App',
   components: {
-    ScatterChart
+    Search,
   }
 }
 </script>

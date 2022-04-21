@@ -22,7 +22,7 @@ module ScrapingModule
   def save_items(elements, search_condition)
     elements.each do |element|
       item = Item.new
-      item.title = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('alt').gsub('のサムネイル', '')
+      item.name = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('alt').gsub('のサムネイル', '')
       item.price = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('price')
       item.url = element.find_element(:tag_name, 'a').attribute('href')
       item.sold = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('sticker').blank? ? :sale : :sold

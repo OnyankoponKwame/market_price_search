@@ -35,6 +35,7 @@ default: &default
   extensions:
     - .tsx
     - .ts
+    - .vue
     - .mjs
     - .js
     - .sass

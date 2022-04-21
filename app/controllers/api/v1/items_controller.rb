@@ -6,13 +6,21 @@ class Api::V1::ItemsController < ApiController
   end
 
   def index
-    search_words = 'ブラッキー SA'
+    search_words = params[:keyword]
+    # search_words = 'ブラッキー SA'
     search_condition = SearchCondition.create(keyword: search_words)
-    scrape(search_condition)
-    items = Item.all
+    # scrape(search_condition)
+    items = Item.where(name: search_words)
     # hash = items.sale.map { |item| Array[item.id, item.price] }.to_json
     hash = items.sale.map { |item| Array[item.updated_at.strftime('%Y-%m-%d'), item.price] }.to_json
 
     render json: hash
   end
+
+  private
+
+  def search_params
+    params.permit(:keyword)
+  end
+
 end
