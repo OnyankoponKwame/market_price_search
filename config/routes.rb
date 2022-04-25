@@ -7,4 +7,6 @@ Rails.application.routes.draw do
       resources :items, only: [:index, :show]
     end
   end
+  get '*path', to: 'home#index' # どのURLにリクエストが来たとしてもhome#indexアクションを使用する
+
 end

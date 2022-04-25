@@ -20,6 +20,7 @@
   },
   "version": "0.1.0",
   "devDependencies": {
+    "@vue/cli-plugin-router": "~5.0.0",
     "@vue/compiler-sfc": "^3.2.33",
     "vue-loader": "^17.0.0",
     "webpack-dev-server": "^3"

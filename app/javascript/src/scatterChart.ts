@@ -34,6 +34,7 @@ export default defineComponent({
     Scatter
   },
   props: {
+    keyword: String,
     chartId: {
       type: String,
       default: 'scatter-chart'
@@ -52,21 +53,28 @@ export default defineComponent({
     },
     styles: {
       type: Object as PropType<Partial<CSSStyleDeclaration>>,
-      default: () => {}
+      default: () => { }
     },
     plugins: {
       type: Array as PropType<Plugin<'scatter'>[]>,
       default: () => []
     }
   },
+
   async setup(props) {
-    const data = await fetch('/api/v1/items.json')
-    const json = await data.json()
-    var array = [];
-    for (const elem of json) {
+    // let keyword = ref(props.keyword)
+    let keyword = props.keyword
+
+    let params = { keyword: keyword }
+    let query = new URLSearchParams(params);
+
+    let data = await fetch(`/api/v1/items?${query}`);
+    let json = await data.json()
+    let array = []
+    for (let elem of json) {
       var x = elem[0];
       var y = elem[1];
-      array.push( { x:x, y:y });
+      array.push({ x: x, y: y });
     };
 
     const chartData = {
