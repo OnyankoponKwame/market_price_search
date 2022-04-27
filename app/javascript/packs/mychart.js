@@ -1,5 +1,7 @@
-import { Chart } from 'chart.js';
-document.addEventListener('turbolinks:load', () => {
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-moment';
+
+window.addEventListener('DOMContentLoaded', function() {
 
   const hash = document.getElementById('hash').value;
   var json = JSON.parse(hash);
@@ -48,7 +50,7 @@ document.addEventListener('turbolinks:load', () => {
           unit: 'day',
           stepSize: 1,
           displayFormats: {
-            'hour': 'H時'
+            'day': 'MM月DD日'
           }
         }
       }
@@ -57,7 +59,7 @@ document.addEventListener('turbolinks:load', () => {
 
   //チャートを表示
   const scatterChartContext = document.getElementById('scatter-chart').getContext('2d');
-  new Chart(scatterChartContext, {
+  window.mychart = new Chart(scatterChartContext, {
     type: 'scatter',
     data: scatterChartData,
     options: scatterChartOption
