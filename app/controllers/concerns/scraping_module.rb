@@ -4,8 +4,11 @@
 module ScrapingModule
   extend ActiveSupport::Concern
   require 'selenium-webdriver'
+
   def scrape(*search_conditions)
-    driver = Selenium::WebDriver.for :chrome
+    options = Selenium::WebDriver::Chrome::Options.new
+    options.add_argument('--headless')
+    driver = Selenium::WebDriver.for :chrome, options: options
     base_url = 'https://www.mercari.com/jp/search/?sort_order=&keyword='
     # :timeoutオプションは秒数を指定している。この場合は100秒
     wait = Selenium::WebDriver::Wait.new(timeout: 100)

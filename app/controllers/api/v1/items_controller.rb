@@ -6,8 +6,8 @@ class Api::V1::ItemsController < ApiController
   end
 
   def index
-    # search_words = params[:keyword]
-    search_words = 'ブラッキー SA'
+    search_words = params[:keyword]
+    # search_words = 'ブラッキー SA'
     search_condition = SearchCondition.find_by(keyword: search_words)
     unless search_condition
       search_condition = SearchCondition.create(keyword: search_words)

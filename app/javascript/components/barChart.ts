@@ -66,7 +66,15 @@ export default defineComponent({
 
     const chartOptions = {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      barPercentage: 1.0,
+      categoryPercentage: 1.0,
+      plugins: {
+        title: {
+          display: true,
+          text: '直近一週間で売れている価格帯'
+        }
+      }
     }
 
     return () =>

@@ -5,6 +5,11 @@
       <button v-on:click="updateChart()">検索</button>
     </div>
 
+    <!-- <div class="shiborikomi">
+      <input v-model="price_min" />
+      <input v-model="price_max" />
+    </div> -->
+
     <Suspense>
       <ScatterChart
         :key="resetKey"
