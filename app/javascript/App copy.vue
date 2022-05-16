@@ -21,13 +21,13 @@
       />
     </Suspense>
     <Suspense>
-      <BarChart
-        :key="resetKey"
-        v-if="resetFlag"
-        :keyword="keyword"
-        :data_array="data_array"
-        :label_array="label_array"
-      />
+      <BarChart 
+      :key="resetKey" 
+      v-if="resetFlag" 
+      :keyword="keyword"
+      :data_array="data_array"
+      :label_array="label_array"
+         />
     </Suspense>
   </div>
 </template>
@@ -43,7 +43,7 @@ export default {
     BarChart,
   },
 
-  setup() {
+  setup(props, context) {
     let resetFlag = ref(false);
     let resetKey = ref(0);
     let keyword = ref<String>('');
@@ -57,17 +57,8 @@ export default {
 
     const updateChart = async () => {
       if (keyword.value) {
-        let params = {
-          keyword: keyword.value,
-          price_min: price_min.value,
-          price_max: price_max.value,
-        };
+        let params = { keyword: keyword.value, price_min: price_min.value,price_max: price_max.value };
         let query = new URLSearchParams(params);
-        sale_array.value = [];
-        sold_array.value = [];
-        data_array.value = [];
-        label_array.value = [];
-        items.value = [];
         await fetch(`/api/v1/items?${query}`)
           .then((response) => {
             if (!response.ok) {
@@ -87,9 +78,11 @@ export default {
               let y = elem[1];
               sold_array.value.push({ x: x, y: y });
             }
-            data_array.value = json["data_array"];
-            label_array.value = json["label_array"];
-            items.value = json["items"];
+            data_array.value = json["data_array"]
+            label_array.value = json["label_array"]
+
+            items.value = json["items"]
+
           });
 
         resetFlag.value = true;
@@ -110,7 +103,7 @@ export default {
       sold_array,
       data_array,
       label_array,
-      items,
+      items
     };
   },
 };
