@@ -6,29 +6,38 @@ class Api::V1::ItemsController < ApiController
   end
 
   def index
-    search_words = params[:keyword]
-    # nonzeroは0のときにnilを返し、そうでない場合は自身を返す?
+    search_word = params[:keyword]
+    # nonzeroは0のときにnilを返し、そうでない場合は自身を返す
     price_min = params[:price_min].to_i.nonzero?
     price_max = params[:price_max].to_i.nonzero?
+    negative_keyword = params[:negative_keyword]
+    include_title_flag = params[:include_title_flag]
+    # cron_flag = params[:cron_flag]
 
-    search_words = 'ブラッキー SA'
-    search_condition = SearchCondition.find_by(keyword: search_words)
-    unless search_condition
-      search_condition = SearchCondition.create(keyword: search_words)
+    search_word = 'ブラッキー SA'
+    search_condition = SearchCondition.find_by(keyword: search_word)
+    if search_condition
+      # その日に検索されていたら検索しない
+      scrape(search_condition) unless search_condition.updated_at >= Time.zone.now.beginning_of_day
+    else
+      search_condition = SearchCondition.create(keyword: search_word)
       scrape(search_condition)
     end
-    items = search_condition.items
-    sale_array = items.sale.published(price_min, price_max).map { |item| Array[item.updated_at.strftime('%Y-%m-%d'), item.price] }
-    sold_array = items.sold.published(price_min, price_max).map { |item| Array[item.updated_at.strftime('%Y-%m-%d'), item.price] }
 
-    price_array = []
-    sold_array.each do |elem|
-      # one_week_ago_day = (Time.current.at_beginning_of_day - 6.day).at_beginning_of_day
-      one_week_ago_day = Date.parse(elem[0])
-      price_array.push(elem[1]) if Date.parse(elem[0]) >= one_week_ago_day
-    end
+    items = search_condition.items
+
+    sale_array = items.sale.price_filtered(price_min, price_max).map do |item|
+      Array[item.updated_at.strftime('%Y-%m-%d'), item.price, item.url] if include_search_word?(item.name, search_word, negative_keyword, include_title_flag)
+    end.compact
+    sold_array = items.sold.price_filtered(price_min, price_max).map do |item|
+      Array[item.updated_at.strftime('%Y-%m-%d'), item.price, item.url] if include_search_word?(item.name, search_word, negative_keyword, include_title_flag)
+    end.compact
+    # 外れ値除外
+    sale_array = outlier_detection(sale_array, price_min, price_max)
+    sold_array = outlier_detection(sold_array, price_min, price_max)
+
     # ヒストグラム用データ
-    data_array, label_array = make_histogram_data(price_array, price_min, price_max)
+    data_array, label_array = make_histogram_data(sold_array)
 
     render json: { sale_array: sale_array, sold_array: sold_array, data_array: data_array, label_array: label_array, items: items }
   end
@@ -39,9 +48,10 @@ class Api::V1::ItemsController < ApiController
     params.permit(:keyword)
   end
 
-  def make_histogram_data(price_array, price_min, price_max)
-    # 外れ値検出
-    price_array = outlier_detection(price_array, price_min, price_max)
+  def make_histogram_data(sold_array)
+    price_array = make_price_array(sold_array)
+    return unless price_array
+
     min_price, max_price = price_array.minmax
     price_range = max_price - min_price
     length = price_array.length
@@ -68,6 +78,15 @@ class Api::V1::ItemsController < ApiController
     [data_array, label_array]
   end
 
+  def make_price_array(sold_array)
+    # 同じurlが含まれないよう日付を降順にしてユニークにする。
+    sorted_array = sold_array.sort_by { |x| x[0] }.reverse
+    uniq_sold_array = sorted_array.uniq(&:last)
+    # 直近一週間のデータの価格を取得
+    one_week_ago_day = (Time.current.at_beginning_of_day - 7.day).at_beginning_of_day
+    uniq_sold_array.map { |elem| elem[1] if Date.parse(elem[0]) >= one_week_ago_day }.compact
+  end
+
   def mround(numerical)
     multiple = if numerical >= 2000
                  1000
@@ -76,30 +95,40 @@ class Api::V1::ItemsController < ApiController
                else
                  100
                end
-    (numerical / multiple.to_f).round * multiple
+    # (numerical / multiple.to_f).round * multiple
+    (numerical / multiple.to_f).floor * multiple
   end
 
-  def outlier_detection(price_array, price_min, price_max)
-    price_array.sort!
+  # 外れ値検出
+  def outlier_detection(item_array, price_min, price_max)
+    return item_array if item_array.blank? || item_array.length <= 10
 
-    q1 = price_array[(price_array.length * 0.25).round]
-    q3 = price_array[(price_array.length * 0.75).round]
+    item_array.sort_by! { |x| x[1] }
+    q1 = item_array[(item_array.length * 0.25).round][1]
+    q3 = item_array[(item_array.length * 0.75).round][1]
+
     iqr = q3 - q1
-
     # 外れ値基準の下限を取得
-    # bottom = q1 - (1.5 * iqr)
     bottom = price_min.present? ? price_min : q1 - (1.5 * iqr)
     # 外れ値基準の上限を取得
-    # up = q3 + (1.5 * iqr)
     up = price_max.present? ? price_max : q3 + (1.5 * iqr)
 
-    price_array.select! { |x| x <= up }
-    price_array.select! { |x| x >= bottom }
-    price_array
+    item_array.select! { |x| x[1] <= up }
+    item_array.select! { |x| x[1] >= bottom }
+
+    item_array
   end
 
-  def integer_string?(str)
-    Integer(str)
-  rescue ArgumentError
+  def include_search_word?(item_name, search_word, negative_keyword, include_title_flag)
+    flag = ActiveRecord::Type::Boolean.new.cast(include_title_flag)
+    if flag
+      search_word.split(/[[:blank:]]+/).each do |word|
+        return false unless item_name.include?(word)
+      end
+    end
+    negative_keyword.split(/[[:blank:]]+/).each do |word|
+      return false if item_name.include?(word)
+    end
+    true
   end
 end

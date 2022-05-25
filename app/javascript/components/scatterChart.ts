@@ -1,7 +1,7 @@
-import { defineComponent, h, PropType } from "vue";
+import { defineComponent, h, PropType, onMounted } from 'vue'
 
-import { Scatter } from "vue-chartjs";
-import "chartjs-adapter-moment";
+import { Scatter } from 'vue-chartjs'
+import 'chartjs-adapter-moment'
 import {
   Chart as ChartJS,
   Title,
@@ -13,8 +13,8 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  Plugin,
-} from "chart.js";
+  Plugin
+} from 'chart.js'
 
 ChartJS.register(
   Title,
@@ -26,83 +26,240 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement
-);
+)
 interface MyObj {
-  created_at: string;
-  id: number;
-  name: string;
-  price: string;
-  search_condition_id: number;
-  sold: string;
-  updated_at: string;
-  url: string;
+  created_at: string
+  id: number
+  name: string
+  price: string
+  search_condition_id: number
+  sold: string
+  updated_at: string
+  url: string
 }
 
 export default defineComponent({
-  name: "ScatterChart",
+  name: 'ScatterChart',
   components: {
-    Scatter,
+    Scatter
   },
   props: {
     items: {
-      type: Array as PropType<MyObj[]>,
+      type: Array as PropType<MyObj[]>
     },
     sale_array: {
-      type: Array,
+      type: Array
     },
     sold_array: {
-      type: Array,
+      type: Array
     },
     keyword: {
-      type: String,
+      type: String
     },
     chartId: {
       type: String,
-      default: "scatter-chart",
+      default: 'scatter-chart'
     },
     width: {
       type: Number,
-      default: 400,
+      default: 400
     },
     height: {
       type: Number,
-      default: 400,
+      default: 400
     },
     cssClasses: {
-      default: "",
-      type: String,
+      default: '',
+      type: String
     },
     styles: {
       type: Object as PropType<Partial<CSSStyleDeclaration>>,
-      default: () => {},
+      default: () => {}
     },
     plugins: {
-      type: Array as PropType<Plugin<"scatter">[]>,
-      default: () => [],
-    },
+      type: Array as PropType<Plugin<'scatter'>[]>,
+      default: () => []
+    }
   },
 
   async setup(props) {
     const chartData = {
       datasets: [
         {
-          label: "sale",
+          label: 'sale',
           fill: false,
-          borderColor: "#f87979",
-          backgroundColor: "#f87979",
-          data: props.sale_array,
+          borderColor: '#f87979',
+          backgroundColor: '#f87979',
+          data: props.sale_array
         },
         {
-          label: "sold",
+          label: 'sold',
           fill: false,
-          borderColor: "#00b2ee",
-          backgroundColor: "#00b2ee",
-          data: props.sold_array,
-        },
-      ],
-    };
+          borderColor: '#00b2ee',
+          backgroundColor: '#00b2ee',
+          data: props.sold_array
+        }
+      ]
+    }
 
-    const items_array = props.items.concat();
+    const items_array = props.items.concat()
+
+    const getOrCreateTooltip = (chart) => {
+      let tooltipEl = chart.canvas.parentNode.querySelector('div')
+
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div')
+        tooltipEl.style.background = 'rgba(0, 0, 0, 0.7)'
+        tooltipEl.style.borderRadius = '3px'
+        tooltipEl.style.color = 'white'
+        tooltipEl.style.opacity = 1
+        tooltipEl.style.position = 'absolute'
+        tooltipEl.style.transform = 'translate(-50%, 0)'
+        tooltipEl.style.transition = 'all .1s ease'
+        tooltipEl.style.pointerEvents = 'auto'
+
+        const table = document.createElement('table')
+        table.style.margin = '0px'
+        table.style.zIndex = '-1'
+
+        tooltipEl.appendChild(table)
+        chart.canvas.parentNode.appendChild(tooltipEl)
+      }
+
+      return tooltipEl
+    }
+
+    const deleteChild = (tooltipEl) => {
+      const tableRoot = tooltipEl.querySelector('table')
+      // Remove old children
+      while (tableRoot.firstChild) {
+        tableRoot.firstChild.remove()
+        tooltipEl.style.opacity = 0
+      }
+    }
+
+    function isSmartPhone() {
+      if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    const externalTooltipHandler = (context) => {
+      // Tooltip Element
+      const { chart, tooltip } = context
+      const tooltipEl = getOrCreateTooltip(chart)
+
+      // Set Text
+      if (tooltip.body) {
+        const titleLines = tooltip.title || []
+        const tableHead = document.createElement('thead')
+
+        titleLines.forEach((title) => {
+          const tr = document.createElement('tr')
+          tr.style.borderWidth = '0'
+
+          const th = document.createElement('th')
+          th.style.borderWidth = '0'
+          const text = document.createTextNode(title)
+
+          th.appendChild(text)
+          tr.appendChild(th)
+          tableHead.appendChild(tr)
+        })
+
+        const tableBody = document.createElement('tbody')
+        let body
+        let data_collection = new Set()
+        tooltip.dataPoints.forEach((dataPoint, i) => {
+          let price = dataPoint.parsed.y
+          let date = dataPoint.raw.x
+          let sold = dataPoint.dataset.label
+
+          let filtered_array = items_array.filter(
+            (data) =>
+              data.price === price && data.updated_at.slice(0, 10) === date && data.sold === sold
+          )
+          filtered_array.forEach((item) => {
+            // 同じ価格のアイテムを順番に処理するため重複チェック
+            if (data_collection.has(item)) {
+              return
+            }
+            data_collection.add(item)
+
+            const colors = tooltip.labelColors[i]
+            const span = document.createElement('span')
+            span.style.background = colors.backgroundColor
+            span.style.borderColor = colors.borderColor
+            span.style.borderWidth = '1px'
+            span.style.marginRight = '10px'
+            span.style.height = '10px'
+            span.style.width = '10px'
+            span.style.display = 'inline-block'
+
+            const tr = document.createElement('tr')
+            tr.style.backgroundColor = 'inherit'
+            tr.style.borderWidth = '0'
+
+            const td = document.createElement('td')
+            td.style.borderWidth = '0'
+
+            let label = ''
+            label += new Intl.NumberFormat('ja-JP', {
+              style: 'currency',
+              currency: 'JPY'
+            }).format(price)
+
+            if (label) {
+              label += ': '
+            }
+
+            let link = document.createElement('a')
+            link.setAttribute('href', item.url)
+            link.setAttribute('target', '_blank')
+            link.appendChild(document.createTextNode(label + item.name))
+
+            td.appendChild(span)
+            td.appendChild(link)
+            tr.appendChild(td)
+            tableBody.appendChild(tr)
+          })
+        })
+
+        const tableRoot = tooltipEl.querySelector('table')
+        // Remove old children
+        while (tableRoot.firstChild) {
+          tableRoot.firstChild.remove()
+        }
+        // Add new children
+        tableRoot.appendChild(tableHead)
+        tableRoot.appendChild(tableBody)
+      }
+
+      const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas
+
+      // Display, position, and set styles for font
+      tooltipEl.style.opacity = 1
+      tooltipEl.style.left = positionX + tooltip.caretX + 'px'
+      tooltipEl.style.top = positionY + tooltip.caretY / 2 + 'px'
+      tooltipEl.style.font = tooltip.options.bodyFont.string
+      tooltipEl.style.padding = tooltip.options.padding + 'px ' + tooltip.options.padding + 'px'
+
+      if(isSmartPhone()){
+        tooltipEl.addEventListener('touchend', function (e) {
+          deleteChild(tooltipEl)
+        })
+      }else{
+        tooltipEl.addEventListener('pointerleave', function (e) {
+          deleteChild(tooltipEl)
+        })
+        document.addEventListener('click', function (e) {
+          deleteChild(tooltipEl)
+          
+        })
+      }
+    }
 
     const label = (context) => {
       let label = "";
@@ -129,43 +286,64 @@ export default defineComponent({
       return label;
     };
 
+    function selectTooltips() {
+      if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+        return {
+          enabled: true,
+          position: 'average',
+          intersect: false,
+          callbacks: {
+            label: label,
+          },
+          itemSort: function (i0, i1) {
+            var v0 = i0.parsed.y
+            var v1 = i1.parsed.y
+            return v0 > v1 ? -1 : v0 < v1 ? 1 : 0
+          }
+        }
+      } else {
+        return {
+          enabled: false,
+          position: 'average',
+          intersect: false,
+          external: externalTooltipHandler,
+          itemSort: function (i0, i1) {
+            var v0 = i0.parsed.y
+            var v1 = i1.parsed.y
+            return v0 > v1 ? -1 : v0 < v1 ? 1 : 0
+          }
+        }
+      }
+    }
+    
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         title: {
           display: true,
-          text: "直近一週間で売れている価格帯",
+          text: '直近一週間で売れている価格帯'
         },
-        tooltip: {
-          callbacks: {
-            label: label,
-          },
-          itemSort: function (i0, i1) {
-            var v0 = i0.parsed.y; // or yLabel
-            var v1 = i1.parsed.y; // or yLabel
-            return v0 > v1 ? -1 : v0 < v1 ? 1 : 0;
-          },
-        },
+        tooltip: selectTooltips()
       },
       scales: {
         x: {
           label: {
             display: true,
-            labelString: "時間",
+            labelString: '時間'
           },
-          type: "time",
+          type: 'time',
           time: {
-            parser: "YYYY-MM-DD",
-            unit: "day",
+            parser: 'YYYY-MM-DD',
+            unit: 'day',
             stepSize: 1,
             displayFormats: {
-              day: "YYYY-MM-DD",
-            },
-          },
-        },
-      },
-    };
+              day: 'YYYY-MM-DD'
+            }
+          }
+        }
+      }
+    }
 
     return () =>
       h(Scatter, {
@@ -176,7 +354,7 @@ export default defineComponent({
         height: props.height,
         cssClasses: props.cssClasses,
         styles: props.styles,
-        plugins: props.plugins,
-      });
-  },
-});
+        plugins: props.plugins
+      })
+  }
+})

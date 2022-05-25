@@ -53,6 +53,11 @@ export default defineComponent({
     }
   },
   setup(props) {
+
+    if(props.data_array == null){
+      return
+    }
+
     const chartData = {
       labels: props.label_array,
       datasets: [

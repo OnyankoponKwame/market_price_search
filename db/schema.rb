@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_18_073813) do
+ActiveRecord::Schema.define(version: 2022_05_20_015252) do
 
   create_table "items", force: :cascade do |t|
     t.string "name"
@@ -30,6 +30,9 @@ ActiveRecord::Schema.define(version: 2022_04_18_073813) do
     t.integer "price_max"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "negative_keyword"
+    t.boolean "include_title_flag", default: false
+    t.boolean "cron_flag", default: false
   end
 
   create_table "words", force: :cascade do |t|

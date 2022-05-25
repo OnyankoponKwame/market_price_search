@@ -1,6 +1,4 @@
 # モジュールだよ
-# frozen_string_literal: true
-
 module ScrapingModule
   extend ActiveSupport::Concern
   require 'selenium-webdriver'
@@ -13,6 +11,8 @@ module ScrapingModule
     # :timeoutオプションは秒数を指定している。この場合は100秒
     wait = Selenium::WebDriver::Wait.new(timeout: 100)
     search_conditions.each do |search_condition|
+      # touchでupdate_atを更新
+      search_condition.touch
       driver.get(base_url + search_condition.keyword)
       # untilメソッドは文字通り「～するまで」を意味する
       wait.until { driver.find_element(:tag_name, 'mer-item-thumbnail').attribute('alt') }

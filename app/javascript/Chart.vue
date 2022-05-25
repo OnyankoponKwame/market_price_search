@@ -1,99 +1,114 @@
 <template>
   <div>
-    <canvas ref="canvasRef" />
+    <div class="search">
+      <input v-model="keyword" />
+      <button v-on:click="updateChart()">検索</button>
+    </div>
+
+    <div class="shiborikomi">
+      <input v-model="price_min" />
+      <input v-model="price_max" />
+    </div>
+
+      <ScatterChart
+        :key="resetKey"
+        v-if="resetFlag"
+        :keyword="keyword"
+        :sale_array="sale_array"
+        :sold_array="sold_array"
+        :items="items"
+      />
+      <BarChart 
+      :key="resetKey" 
+      v-if="resetFlag" 
+      :keyword="keyword"
+      :data_array="data_array"
+      :label_array="label_array"
+         />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch, computed, reactive } from 'vue'
-import { Chart } from 'chart.js'
-import { options } from '@/config/config'
-import { TChartData } from '@/data/data'
+<script>
+import ScatterChart from "./components/scatterChart";
+import BarChart from "./components/barChart";
+import { ref } from "vue";
 
-export default defineComponent({
-  name: 'chart',
-  props: {
-    chartData: {
-      type: TChartData,
-      required: true
-    },
-    chartType: {
-      type: Number,
-      required: true
-    }
+export default {
+  components: {
+    ScatterChart,
+    BarChart,
   },
-  setup (props) {
-    // チャートに表示させるデータをまとめたオブジェクト
-    const data = {
-      dataSets: props.chartData,
-      dataOptions: options
-    }
 
-    // 初期表示
-    onMounted(() => {
-      createCharts()
-    })
+  async setup(props, context) {
+    let resetFlag = ref(false);
+    let resetKey = ref(0);
+    let keyword = ref<String>('');
+    let price_min = ref<String>('');
+    let price_max = ref<String>('');
+    let sale_array = ref([]);
+    let sold_array = ref([]);
+    let data_array = ref([]);
+    let label_array = ref([]);
+    let items = ref([]);
 
-    // computedせずに再代入するとreactiveではなくなってしまう。
-    const chartType = computed(() => props.chartType)
-    // chartTypeが変更されたかどうかを監視
-    // 変更されたらChartを変更
-    watch(chartType, () => {
-      createCharts()
-    })
+    const updateChart = async () => {
+      if (keyword.value) {
+        let params = { keyword: keyword.value, price_min: price_min.value,price_max: price_max.value };
+        let query = new URLSearchParams(params);
+        await fetch(`/api/v1/items?${query}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Country not found (${response.status})`);
+            }
+            return response.json();
+          })
+          // ここでjson形式のdataになる
+          .then((json) => {
+            for (let elem of json["sale_array"]) {
+              let x = elem[0];
+              let y = elem[1];
+              sale_array.value.push({ x: x, y: y });
+            }
+            for (let elem of json["sold_array"]) {
+              let x = elem[0];
+              let y = elem[1];
+              sold_array.value.push({ x: x, y: y });
+            }
+            data_array.value = json["data_array"]
+            label_array.value = json["label_array"]
 
-    // canvasに対してref設定
-    const canvasRef = ref<HTMLCanvasElement | null>(null)
-    
-    let data = await fetch(`/api/v1/items?${query}`);
-    let json = await data.json()
-    let sale_array = []
-    let sold_array = []
+            items.value = json["items"]
 
-    for (let elem of JSON.parse(json['sale_array'])) {
-      var x = elem[0];
-      var y = elem[1];
-      sale_array.push({ x: x, y: y });
-    };
+          });
 
-    for (let elem of JSON.parse(json['sold_array'])) {
-      var x = elem[0];
-      var y = elem[1];
-      sold_array.push({ x: x, y: y });
-    };
-
-    const obj = {}
-
-    function createCharts () {
-      const data = getSelectedData()[0]
-      if (canvasRef.value === null) return
-      const canvas = canvasRef.value.getContext('2d')
-      if (canvas === null) return
-      // すでにチャートが作られていたら更新処理をする
-      if (obj.chart instanceof Chart) {
-        obj.chart.data.datasets[0] = data.datasets
-        obj.chart.update()
+        resetFlag.value = true;
+        resetKey.value++;
       } else {
-        // 初期表示の時だけチャートを生成
-        const c = new Chart(canvas, {
-          type: 'bar',
-          data: {
-            labels: data.labels,
-            datasets: [{
-              label: data.datasets.label,
-              data: data.datasets.data
-            }]
-          }
-        })
-        obj.chart = c
+        resetFlag.value = false;
       }
-    }
+    };
 
     return {
-      data,
-      canvasRef
-    }
-  }
-})
+      keyword,
+      price_min,
+      price_max,
+      updateChart,
+      resetFlag,
+      resetKey,
+      sale_array,
+      sold_array,
+      data_array,
+      label_array,
+      items
+    };
+  },
+};
 </script>
-<style></style>
+
+<style>
+.shiborikomi {
+  background-color: rgb(250, 250, 250);
+  padding: 8px;
+  border-radius: 15px;
+}
+</style>
