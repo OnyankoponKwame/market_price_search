@@ -3,23 +3,44 @@ module ScrapingModule
   extend ActiveSupport::Concern
   require 'selenium-webdriver'
 
-  def scrape(*search_conditions)
-    options = Selenium::WebDriver::Chrome::Options.new
-    options.add_argument('--headless')
-    driver = Selenium::WebDriver.for :chrome, options: options
-    base_url = 'https://www.mercari.com/jp/search/?sort_order=&keyword='
+  BASE_URL = 'https://www.mercari.com/jp/search/?sort_order=&keyword='
+  OPTIONS = Selenium::WebDriver::Chrome::Options.new
+  OPTIONS.add_argument('--headless')
+
+  def scrape(search_condition)
+    driver = Selenium::WebDriver.for :chrome, capabilities: [OPTIONS]
     # :timeoutオプションは秒数を指定している。この場合は100秒
     wait = Selenium::WebDriver::Wait.new(timeout: 100)
+    get(driver, wait, search_condition)
+  rescue Selenium::WebDriver::Error::TimeoutError => e
+    Rails.logger.debug "Timeout検索キーワード：#{search_condition.keyword}"
+    Rails.logger.error e
+  ensure
+    driver.quit
+  end
+
+  def scrape_rake(search_conditions)
+    driver = Selenium::WebDriver.for :chrome, capabilities: [OPTIONS]
+    # :timeoutオプションは秒数を指定している。この場合は100秒
+    wait = Selenium::WebDriver::Wait.new(timeout: 4)
     search_conditions.each do |search_condition|
-      # touchでupdate_atを更新
-      search_condition.touch
-      driver.get(base_url + search_condition.keyword)
-      # untilメソッドは文字通り「～するまで」を意味する
-      wait.until { driver.find_element(:tag_name, 'mer-item-thumbnail').attribute('alt') }
-      elements = driver.find_elements(:xpath, "//*[@data-testid='item-cell']")
-      save_items(elements, search_condition)
+      get(driver, wait, search_condition)
+    rescue Selenium::WebDriver::Error::TimeoutError => e
+      # debugger
+      Rails.logger.debug "Timeout検索キーワード：#{search_condition.keyword}"
+      Rails.logger.error e
+      next
     end
     driver.quit
+  end
+
+  def get(driver, wait, search_condition)
+    driver.get(BASE_URL + search_condition.keyword)
+    # untilメソッドは文字通り「～するまで」を意味する
+    wait.until { driver.find_element(:tag_name, 'mer-item-thumbnail').attribute('alt') }
+    elements = driver.find_elements(:xpath, "//*[@data-testid='item-cell']")
+    save_items(elements, search_condition)
+    search_condition.touch
   end
 
   def save_items(elements, search_condition)

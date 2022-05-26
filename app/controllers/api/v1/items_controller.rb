@@ -1,5 +1,7 @@
 class Api::V1::ItemsController < ApiController
   include ScrapingModule
+  require './app/commonclass/item_resource'
+
   # ActiveRecordのレコードが見つからなければ404 not foundを応答する
   rescue_from ActiveRecord::RecordNotFound do |_exception|
     render json: { error: '404 not found' }, status: 404
@@ -12,7 +14,9 @@ class Api::V1::ItemsController < ApiController
     price_max = params[:price_max].to_i.nonzero?
     negative_keyword = params[:negative_keyword]
     include_title_flag = params[:include_title_flag]
-    # cron_flag = params[:cron_flag]
+
+    cookies.permanent[:search_condition] =
+      { value: 'XJ-122', expires: 1.hour.from_now }
 
     search_word = 'ブラッキー SA'
     search_condition = SearchCondition.find_by(keyword: search_word)
@@ -27,10 +31,10 @@ class Api::V1::ItemsController < ApiController
     items = search_condition.items
 
     sale_array = items.sale.price_filtered(price_min, price_max).map do |item|
-      Array[item.updated_at.strftime('%Y-%m-%d'), item.price, item.url] if include_search_word?(item.name, search_word, negative_keyword, include_title_flag)
+      Array[item.updated_at.strftime('%Y-%m-%d'), item.price, item.url] if satisfy_conditions?(item.name, search_word, negative_keyword, include_title_flag)
     end.compact
     sold_array = items.sold.price_filtered(price_min, price_max).map do |item|
-      Array[item.updated_at.strftime('%Y-%m-%d'), item.price, item.url] if include_search_word?(item.name, search_word, negative_keyword, include_title_flag)
+      Array[item.updated_at.strftime('%Y-%m-%d'), item.price, item.url] if satisfy_conditions?(item.name, search_word, negative_keyword, include_title_flag)
     end.compact
     # 外れ値除外
     sale_array = outlier_detection(sale_array, price_min, price_max)
@@ -38,8 +42,11 @@ class Api::V1::ItemsController < ApiController
 
     # ヒストグラム用データ
     data_array, label_array = make_histogram_data(sold_array)
+    items_serialized = ItemResource.new(items).serialize
+    data = { sale_array: sale_array.as_json, sold_array: sold_array.as_json, data_array: data_array.as_json, label_array: label_array.as_json, items: items_serialized }
 
-    render json: { sale_array: sale_array, sold_array: sold_array, data_array: data_array, label_array: label_array, items: items }
+    render json: data
+    # render json: { sale_array: sale_array, sold_array: sold_array, data_array: data_array, label_array: label_array, items: items }
   end
 
   private
@@ -119,15 +126,17 @@ class Api::V1::ItemsController < ApiController
     item_array
   end
 
-  def include_search_word?(item_name, search_word, negative_keyword, include_title_flag)
+  def satisfy_conditions?(item_name, search_word, negative_keyword, include_title_flag)
     flag = ActiveRecord::Type::Boolean.new.cast(include_title_flag)
     if flag
       search_word.split(/[[:blank:]]+/).each do |word|
         return false unless item_name.include?(word)
       end
     end
-    negative_keyword.split(/[[:blank:]]+/).each do |word|
-      return false if item_name.include?(word)
+    if negative_keyword.present?
+      negative_keyword.split(/[[:blank:]]+/).each do |word|
+        return false if item_name.include?(word)
+      end
     end
     true
   end

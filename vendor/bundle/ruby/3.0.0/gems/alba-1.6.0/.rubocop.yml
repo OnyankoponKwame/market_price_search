@@ -1,0 +1,90 @@
+---
+
+inherit_gem:
+  rubocop-sensible: 'config/rubocop.yml'
+
+require:
+  - rubocop-minitest
+  - rubocop-performance
+  - rubocop-rake
+
+AllCops:
+  Exclude:
+    - 'Rakefile'
+    - 'alba.gemspec'
+    - 'benchmark/**/*.rb'
+    - 'script/**/*.rb'
+  NewCops: enable
+  EnabledByDefault: true
+  TargetRubyVersion: 2.5
+
+# Items in Gemfile is dev dependencies and we don't have to specify versions.
+Bundler/GemVersion:
+  Enabled: false
+
+# We'd like to write something like:
+#   assert_equal(
+#     expected,
+#     actual
+#   )
+Layout/RedundantLineBreak:
+  Exclude:
+    - 'test/**/*'
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Layout/MultilineAssignmentLayout:
+  EnforcedStyle: same_line
+
+Lint/ConstantResolution:
+  Enabled: false
+
+# In test code we don't care about the metrics!
+Metrics:
+  Exclude:
+    - 'test/**/*.rb'
+
+# `Resource` module is a core module and its length tends to be long...
+# `Alba` main module is also long because it has all parts of configuration
+Metrics/ModuleLength:
+  Exclude:
+    - 'lib/alba/resource.rb'
+    - 'lib/alba.rb'
+
+# Resource class includes DSLs, which tend to accept long list of parameters
+Metrics/ParameterLists:
+  Exclude:
+    - 'test/**/*.rb'
+
+# We need to eval resource code to test errors on resource classes
+Security/Eval:
+  Exclude:
+    - 'test/**/*.rb'
+
+Style/ConstantVisibility:
+  Exclude:
+    - 'lib/alba/version.rb'
+
+Style/Copyright:
+  Enabled: false
+
+# I know what I do :)
+Style/DisableCopsWithinSourceCodeDirective:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/InlineComment:
+  Enabled: false
+
+Style/MethodCallWithArgsParentheses:
+  IgnoredMethods: ['require', 'require_relative', 'include', 'extend', 'puts', 'p', 'warn', 'raise', 'send', 'public_send']
+  Exclude:
+    # There are so many `attributes` call without parenthese and that's absolutely fine
+    - 'test/**/*.rb'
+
+# There are so many cases we just want `if` expression!
+Style/MissingElse:
+  EnforcedStyle: case
