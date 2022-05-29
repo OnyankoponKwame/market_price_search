@@ -46,7 +46,6 @@ class Api::V1::ItemsController < ApiController
     data = { sale_array: sale_array.as_json, sold_array: sold_array.as_json, data_array: data_array.as_json, label_array: label_array.as_json, items: items_serialized }
 
     render json: data
-    # render json: { sale_array: sale_array, sold_array: sold_array, data_array: data_array, label_array: label_array, items: items }
   end
 
   private
@@ -77,7 +76,7 @@ class Api::V1::ItemsController < ApiController
       max = i == bins ? max_price : start_price + i * bin_range - 1
       filter_array = price_array.select { |x| x >= min }.select { |x| x <= max }
 
-      label = "#{min} ~ #{max}"
+      label = "¥#{min} ~ ¥#{max}"
       label_array.push(label)
       frequency = filter_array.length
       data_array.push(frequency)

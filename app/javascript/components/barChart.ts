@@ -62,8 +62,9 @@ export default defineComponent({
       labels: props.label_array,
       datasets: [
         {
-          label: 'Data One',
-          backgroundColor: '#f87979',
+          label: 'sold',
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
           data: props.data_array
         }
       ]
@@ -73,6 +74,7 @@ export default defineComponent({
       responsive: true,
       maintainAspectRatio: false,
       barPercentage: 1.0,
+      borderWidth: 1,
       categoryPercentage: 1.0,
       plugins: {
         title: {

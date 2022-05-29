@@ -88,15 +88,15 @@ export default defineComponent({
         {
           label: 'sale',
           fill: false,
-          borderColor: '#f87979',
-          backgroundColor: '#f87979',
+          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
           data: props.sale_array
         },
         {
           label: 'sold',
           fill: false,
-          borderColor: '#00b2ee',
-          backgroundColor: '#00b2ee',
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
           data: props.sold_array
         }
       ]
@@ -153,24 +153,8 @@ export default defineComponent({
 
       // Set Text
       if (tooltip.body) {
-        const titleLines = tooltip.title || []
         const tableHead = document.createElement('thead')
-
-        titleLines.forEach((title) => {
-          const tr = document.createElement('tr')
-          tr.style.borderWidth = '0'
-
-          const th = document.createElement('th')
-          th.style.borderWidth = '0'
-          const text = document.createTextNode(title)
-
-          th.appendChild(text)
-          tr.appendChild(th)
-          tableHead.appendChild(tr)
-        })
-
         const tableBody = document.createElement('tbody')
-        let body
         let data_collection = new Set()
         tooltip.dataPoints.forEach((dataPoint, i) => {
           let price = dataPoint.parsed.y
@@ -322,7 +306,7 @@ export default defineComponent({
       plugins: {
         title: {
           display: true,
-          text: '直近一週間で売れている価格帯'
+          // text: '直近一週間で売れている価格帯'
         },
         tooltip: selectTooltips()
       },
@@ -330,7 +314,6 @@ export default defineComponent({
         x: {
           label: {
             display: true,
-            labelString: '時間'
           },
           type: 'time',
           time: {

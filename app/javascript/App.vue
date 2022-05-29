@@ -1,24 +1,74 @@
 <template>
   <div class="container">
-    <div class="row pt-3">
-      <div class="col-md-3 g-0">
-        <img src="/assets/title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
-      </div>
-      <div class="col-md-5 offset-md-2">
-        <!-- <div class="float-end"> -->
-        <div class="input-group">
-          <input v-model="keyword" type="text" class="form-control" aria-describedby="button-addon2" />
-          <button class="btn btn-primary" type="button" id="button-addon2" v-on:click="updateChart()">検索</button>
+    <!-- スマホ用 -->
+    <div class="d-md-none">
+      <div class="row pt-3">
+        <div class="col-7 ps-1 g-0">
+          <img src="/assets/title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
+        </div>
+        <div class="col-auto offset-1">
+          <button type="button" class="btn btn-outline-danger" v-on:click="postChart()">定期実行登録</button>
+        </div>
+        <div class="col-12">
+          <div class="input-group">
+            <input v-model="keyword" @input="historyDisplay" type="text" class="form-control" aria-describedby="button-addon2" />
+            <button class="btn btn-primary" type="button" id="button-addon2" v-on:click="updateChart()">検索</button>
+          </div>
         </div>
       </div>
-      <!-- </div> -->
-      <div class="col-md d-none d-md-block">
-        <button type="button" class="btn btn-outline-danger ms-auto" v-on:click="postChart()">定期実行登録</button>
+    </div>
+    <!-- PC用 -->
+    <div class="d-none d-md-block">
+      <div class="row pt-3">
+        <div class="col-md-3 g-0">
+          <img src="/assets/title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
+        </div>
+        <div class="col-md-5 offset-md-2">
+          <div class="input-group">
+            <input v-model="keyword" @input="historyDisplay" type="text" class="form-control" aria-describedby="button-addon2" />
+            <button class="btn btn-primary" type="button" id="button-addon2" v-on:click="updateChart()">検索</button>
+          </div>
+        </div>
+        <div class="col-md">
+          <button type="button" class="btn btn-outline-danger" v-on:click="postChart()">定期実行登録</button>
+        </div>
       </div>
     </div>
 
+    <!-- ここから絞り込み -->
     <div class="row mb-3 pt-3">
-      <!-- ここから絞り込み -->
+      <!-- スマホ用 -->
+      <div class="d-md-none">
+        <details>
+          <summary>詳細検索</summary>
+          <div class="col-12 border rounded shiborikomi">
+            <div class="h5 pb-2 mb-3 text-dark border-bottom d-flex">
+              絞り込み
+              <button type="button" class="btn btn-outline-primary ms-auto py-0" v-on:click="clearInput()">クリア</button>
+            </div>
+            <div class="col-12 mb-3">
+              <label>価格</label>
+              <div class="input-group">
+                <input v-model="price_min" placeholder="Min" aria-label="Min" class="form-control" />
+                <input v-model="price_max" placeholder="Max" aria-label="Max" class="form-control" />
+              </div>
+            </div>
+            <div class="col-12 mb-2">
+              <label>除外ワード</label>
+              <div class="input-group">
+                <input v-model="negative_keyword" placeholder="〜を含まない" aria-label="Min" class="form-control" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input v-model="include_title_flag" class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
+                <label class="form-check-label" for="flexCheckDefault" style="font-size: 0.9rem"> タイトルに検索ワードを含む </label>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+      <!-- PC用 -->
       <div class="col-md-3 h-50 border rounded d-none d-md-block shiborikomi">
         <div class="h5 pb-2 mb-3 text-dark border-bottom d-flex">
           絞り込み
@@ -31,26 +81,48 @@
             <input v-model="price_max" placeholder="Max" aria-label="Max" class="form-control" />
           </div>
         </div>
-
         <div class="col-12 mb-2">
           <label>除外ワード</label>
           <div class="input-group">
             <input v-model="negative_keyword" placeholder="〜を含まない" aria-label="Min" class="form-control" />
           </div>
         </div>
-
         <div class="col-12">
           <div class="form-check">
             <input v-model="include_title_flag" class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
             <label class="form-check-label" for="flexCheckDefault" style="font-size: 0.9rem"> タイトルに検索ワードを含む </label>
           </div>
         </div>
-        <!-- </div> -->
       </div>
+
       <div class="col-md">
         <div v-if="isError" class="text-center text-danger">エラー{{ response_message }}</div>
         <div v-else-if="isLoading" class="text-center text-secondary">読み込み中...</div>
         <div v-else-if="result_message" class="text-center text-success">{{ result_message }}</div>
+        <div v-else-if="history_display_flag">
+          <div v-for="search_condition in search_condition_array" :key="search_condition.keyword" class="border-bottom col-md-10 offset-md-2">
+            <div class="d-flex">
+              <div class="me-auto align-self-center">
+                <span class="fw-bold">
+                {{ search_condition.keyword }}
+                </span>
+                &nbsp;
+                <span v-if="search_condition.price_min">Min:¥{{ search_condition.price_min }}&nbsp;</span>
+                <span v-if="search_condition.price_max">Max:¥{{ search_condition.price_max }}&nbsp;</span>
+                <span v-if="search_condition.negative_keyword">除外:{{ search_condition.negative_keyword }}&nbsp;</span>
+                <span v-if="search_condition.include_title_flag">タイトルに含む</span>
+              </div>
+              <div>
+                <button type="button" class="btn btn-default" v-on:click="updateChart(search_condition)">
+                  <i class="fa-solid fa-angle-right"></i>
+                </button>
+                <button type="button" class="btn btn-default text-danger" v-on:click="deleteHistory(search_condition)">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div v-else>
           <Suspense>
             <ScatterChart :key="resetKey" v-if="resetFlag" :keyword="keyword" :sale_array="sale_array" :sold_array="sold_array" :items="items" />
@@ -67,7 +139,7 @@
 <script>
 import ScatterChart from './components/scatterChart'
 import BarChart from './components/barChart'
-import { ref } from 'vue'
+import { ref, reactive, toRaw } from 'vue'
 
 export default {
   components: {
@@ -92,21 +164,38 @@ export default {
     let isError = ref(false)
     let response_message = ref('')
     let result_message = ref('')
+    let search_condition_array = reactive([])
+    let history_display_flag = ref(false)
 
-    function shokihyouji() {
-      let localSt = localStorage.getItem('search_condition')
+    function Initialization() {
+      let localSt = localStorage.getItem('search_conditions')
       if (localSt != null) {
-        let search_condition_array = JSON.parse(localSt)
-        
-
+        search_condition_array = reactive(JSON.parse(localSt))
+        history_display_flag.value = true
       }
+    }
+    Initialization()
 
+    function historyDisplay() {
+      if (keyword.value.trim()) {
+        history_display_flag.value = false
+      } else {
+        history_display_flag.value = true
+      }
     }
 
-    const updateChart = async () => {
+    const updateChart = async (search_condition = '') => {
       result_message.value = ''
-      if (keyword.value.trim()) {
+      if (keyword.value.trim() || search_condition) {
         isLoading.value = true
+        // 引数が設定されている場合（検索履歴）そちらのデータで検索
+        if (search_condition) {
+          keyword.value = search_condition.keyword
+          price_min.value = search_condition.price_min
+          price_max.value = search_condition.price_max
+          negative_keyword.value = search_condition.negative_keyword
+          include_title_flag.value = search_condition.include_title_flag
+        }
         let params = {
           keyword: keyword.value,
           price_min: price_min.value,
@@ -115,16 +204,10 @@ export default {
           include_title_flag: include_title_flag.value
         }
         // Localstorage
-        let params_json = []
-        params_json.push(params)
-
-        let localSt = localStorage.getItem('search_condition')
-        if (localSt == null) {
-          localStorage.setItem('search_condition', JSON.stringify(params_json))
-        } else {
-          let search_condition_array = JSON.parse(localSt)
+        // 検索履歴に同じ条件あった場合は追加しない
+        if (!toRaw(search_condition_array).some((e) => JSON.stringify(e) === JSON.stringify(params))) {
           search_condition_array.push(params)
-          localStorage.setItem('search_condition', JSON.stringify(search_condition_array))
+          localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
         }
 
         let query = new URLSearchParams(params)
@@ -152,7 +235,7 @@ export default {
         label_array.value = json['label_array']
         items.value = JSON.parse(json['items'])
         isLoading.value = false
-
+        history_display_flag.value = false
         resetFlag.value = true
         resetKey.value++
       } else {
@@ -212,10 +295,18 @@ export default {
       include_title_flag.value = ''
     }
 
+    function deleteHistory(search_condition) {
+      let index = search_condition_array.indexOf(search_condition)
+      search_condition_array.splice(index, 1)
+      localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
+    }
+
     return {
       updateChart,
       postChart,
       clearInput,
+      deleteHistory,
+      historyDisplay,
       keyword,
       price_min,
       price_max,
@@ -231,7 +322,9 @@ export default {
       isLoading,
       isError,
       response_message,
-      result_message
+      result_message,
+      search_condition_array,
+      history_display_flag
     }
   }
 }
@@ -243,5 +336,11 @@ export default {
   padding: 8px;
   border-radius: 15px;
   width: 250px;
+}
+summary {
+  transition: 0.2s; /* 変化を滑らかに */
+  text-align: center;
+  background-color: #efefef;
+  border-radius: 5px;
 }
 </style>
