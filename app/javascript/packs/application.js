@@ -13,7 +13,6 @@ import App from '../App.vue'
 
 window.bootstrap = require("bootstrap")
 
-
 document.addEventListener("DOMContentLoaded", () => {
   const app = createApp(App);
   app.mount("#vue-app")

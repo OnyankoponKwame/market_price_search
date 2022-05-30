@@ -14,6 +14,7 @@
     "chartjs-adapter-moment": "^1.0.0",
     "moment": "^2.29.2",
     "nth-check": "2.0.1",
+    "rails_admin": "3.0.0",
     "semantic-ui-css": "^2.4.1",
     "typescript": "^4.6.3",
     "vue": "^3.2.31",
