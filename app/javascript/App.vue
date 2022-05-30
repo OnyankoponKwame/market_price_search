@@ -125,7 +125,7 @@
         </div>
         <div v-else-if="result_message" class="text-center text-success">{{ result_message }}</div>
         <div v-else-if="history_display_flag">
-          <div v-for="search_condition in search_condition_array" :key="search_condition.keyword" class="border-bottom col-md-10 offset-md-2">
+          <div v-for="search_condition in search_condition_array" :key="search_condition.keyword" class="border-bottom col-md-9 offset-md-2">
             <div class="d-flex">
               <div class="me-auto align-self-center">
                 <span class="fw-bold">
