@@ -1,4 +1,6 @@
 class SearchConditionsController < ApplicationController
+  skip_before_action :require_login
+
   def create
     search_condition = SearchCondition.find_by(keyword: params[:keyword])
     if search_condition

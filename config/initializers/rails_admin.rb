@@ -9,8 +9,8 @@ RailsAdmin.config do |config|
   # end
   # config.current_user_method(&:current_user)
 
-  ## == CancanCan ==
-  # config.authorize_with :cancancan
+  # == CancanCan ==
+  config.authorize_with :cancancan
 
   ## == Pundit ==
   # config.authorize_with :pundit
@@ -39,5 +39,14 @@ RailsAdmin.config do |config|
     # history_index
     # history_show
   end
+  config.authenticate_with do
+    #sorceryのメソッド
+    require_login
+
+    redirect_to root_path unless current_user # 追記
+  end
+  config.current_user_method(&:current_user)
+  config.parent_controller = 'ApplicationController' #追記
+
   config.main_app_name = 'フリマチャート'
 end

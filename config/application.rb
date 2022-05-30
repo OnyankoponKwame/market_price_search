@@ -19,5 +19,11 @@ module MarketPriceSearch3
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.i18n.default_locale = :ja
+    config.generators do |g|  # ここから追記
+      g.assets false          # CSS, JavaScriptファイル生成せず
+      g.skip_routes false     # trueならroutes.rb変更せず、falseなら通常通り変更
+      g.test_framework false  # testファイル生成せず
+      g.helper false
+    end
   end
 end

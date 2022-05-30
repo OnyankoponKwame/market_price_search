@@ -10,12 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_20_015252) do
+ActiveRecord::Schema.define(version: 2022_05_30_174645) do
 
   create_table "items", force: :cascade do |t|
     t.string "name"
     t.integer "price"
-    t.integer "sold"
+    t.integer "sales_status"
     t.string "url"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -24,21 +24,22 @@ ActiveRecord::Schema.define(version: 2022_05_20_015252) do
   end
 
   create_table "search_conditions", force: :cascade do |t|
-    t.string "keyword"
-    t.integer "item_condition"
+    t.string "keyword", null: false
     t.integer "price_min"
     t.integer "price_max"
+    t.boolean "cron_flag", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "negative_keyword"
-    t.boolean "include_title_flag", default: false
-    t.boolean "cron_flag", default: false
+    t.index ["keyword"], name: "index_search_conditions_on_keyword", unique: true
   end
 
-  create_table "words", force: :cascade do |t|
-    t.string "name"
+  create_table "users", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "crypted_password"
+    t.string "salt"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "items", "search_conditions"
