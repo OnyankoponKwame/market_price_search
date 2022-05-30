@@ -15,9 +15,6 @@ class Api::V1::ItemsController < ApiController
     negative_keyword = params[:negative_keyword]
     include_title_flag = params[:include_title_flag]
 
-    cookies.permanent[:search_condition] =
-      { value: 'XJ-122', expires: 1.hour.from_now }
-
     search_word = 'ブラッキー SA'
     search_condition = SearchCondition.find_by(keyword: search_word)
     if search_condition
@@ -45,18 +42,18 @@ class Api::V1::ItemsController < ApiController
     items_serialized = ItemResource.new(items).serialize
     data = { sale_array: sale_array.as_json, sold_array: sold_array.as_json, data_array: data_array.as_json, label_array: label_array.as_json, items: items_serialized }
 
-    render json: data
+    if sale_array.present? || sold_array.present?
+      render json: data
+    else
+      head :not_found
+    end
   end
 
   private
 
-  def search_params
-    params.permit(:keyword)
-  end
-
   def make_histogram_data(sold_array)
     price_array = make_price_array(sold_array)
-    return unless price_array
+    return if price_array.blank?
 
     min_price, max_price = price_array.minmax
     price_range = max_price - min_price

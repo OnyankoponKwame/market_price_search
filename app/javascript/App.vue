@@ -2,12 +2,22 @@
   <div class="container">
     <!-- スマホ用 -->
     <div class="d-md-none">
-      <div class="row pt-3">
+      <div class="row pt-3 d-flex">
         <div class="col-7 ps-1 g-0">
           <img src="/assets/title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
         </div>
-        <div class="col-auto offset-1">
-          <button type="button" class="btn btn-outline-danger" v-on:click="postChart()">定期実行登録</button>
+        <div class="col-auto ms-auto">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            data-bs-custom-class="custom-tooltip"
+            title="定期実行登録すると毎日登録した検索条件で検索されデータベースに蓄積されます。再度押すと登録が解除されます。"
+            v-on:click="postChart()"
+          >
+            定期実行登録
+          </button>
         </div>
         <div class="col-12">
           <div class="input-group">
@@ -30,7 +40,17 @@
           </div>
         </div>
         <div class="col-md">
-          <button type="button" class="btn btn-outline-danger" v-on:click="postChart()">定期実行登録</button>
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            data-bs-custom-class="custom-tooltip"
+            title="定期実行登録すると毎日登録した検索条件で検索されデータベースに蓄積されます。再度押すと登録が解除されます。"
+            v-on:click="postChart()"
+          >
+            定期実行登録
+          </button>
         </div>
       </div>
     </div>
@@ -49,8 +69,8 @@
             <div class="col-12 mb-3">
               <label>価格</label>
               <div class="input-group">
-                <input v-model="price_min" placeholder="Min" aria-label="Min" class="form-control" />
-                <input v-model="price_max" placeholder="Max" aria-label="Max" class="form-control" />
+                <input v-model="price_min" type="number" step="10" min="300" placeholder="Min" aria-label="Min" class="form-control" />
+                <input v-model="price_max" type="number" step="10" min="300" placeholder="Max" aria-label="Max" class="form-control" />
               </div>
             </div>
             <div class="col-12 mb-2">
@@ -77,8 +97,8 @@
         <div class="col-12 mb-3">
           <label>価格</label>
           <div class="input-group">
-            <input v-model="price_min" placeholder="Min" aria-label="Min" class="form-control" />
-            <input v-model="price_max" placeholder="Max" aria-label="Max" class="form-control" />
+            <input v-model="price_min" type="number" step="10" min="300" placeholder="Min" aria-label="Min" class="form-control" />
+            <input v-model="price_max" type="number" step="10" min="300" placeholder="Max" aria-label="Max" class="form-control" />
           </div>
         </div>
         <div class="col-12 mb-2">
@@ -94,17 +114,22 @@
           </div>
         </div>
       </div>
-
+      <!-- チャート部分 -->
       <div class="col-md">
         <div v-if="isError" class="text-center text-danger">エラー{{ response_message }}</div>
-        <div v-else-if="isLoading" class="text-center text-secondary">読み込み中...</div>
+        <div v-else-if="isLoading" class="text-center text-secondary">
+          <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          読み込み中...
+        </div>
         <div v-else-if="result_message" class="text-center text-success">{{ result_message }}</div>
         <div v-else-if="history_display_flag">
           <div v-for="search_condition in search_condition_array" :key="search_condition.keyword" class="border-bottom col-md-10 offset-md-2">
             <div class="d-flex">
               <div class="me-auto align-self-center">
                 <span class="fw-bold">
-                {{ search_condition.keyword }}
+                  {{ search_condition.keyword }}
                 </span>
                 &nbsp;
                 <span v-if="search_condition.price_min">Min:¥{{ search_condition.price_min }}&nbsp;</span>
@@ -139,7 +164,7 @@
 <script>
 import ScatterChart from './components/scatterChart'
 import BarChart from './components/barChart'
-import { ref, reactive, toRaw } from 'vue'
+import { onMounted, ref, reactive, toRaw } from 'vue'
 
 export default {
   components: {
@@ -183,7 +208,6 @@ export default {
         history_display_flag.value = true
       }
     }
-
     const updateChart = async (search_condition = '') => {
       result_message.value = ''
       if (keyword.value.trim() || search_condition) {
@@ -203,13 +227,14 @@ export default {
           negative_keyword: negative_keyword.value,
           include_title_flag: include_title_flag.value
         }
+        price_min.value > price_max.value
+
         // Localstorage
         // 検索履歴に同じ条件あった場合は追加しない
         if (!toRaw(search_condition_array).some((e) => JSON.stringify(e) === JSON.stringify(params))) {
           search_condition_array.push(params)
           localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
         }
-
         let query = new URLSearchParams(params)
         sale_array.value = []
         sold_array.value = []
@@ -301,6 +326,11 @@ export default {
       localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
     }
 
+    onMounted(() => {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })
+
     return {
       updateChart,
       postChart,
@@ -342,5 +372,8 @@ summary {
   text-align: center;
   background-color: #efefef;
   border-radius: 5px;
+}
+.custom-tooltip {
+  --bs-tooltip-bg: var(--bs-secondary);
 }
 </style>

@@ -6,6 +6,18 @@
 import Rails from "@rails/ujs"
 import * as ActiveStorage from "@rails/activestorage"
 import "channels"
+import "bootstrap";
+import "../stylesheets/application.scss";
+import { createApp } from 'vue'
+import App from '../App.vue'
+
+window.bootstrap = require("bootstrap")
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const app = createApp(App);
+  app.mount("#vue-app")
+});
 
 Rails.start()
 ActiveStorage.start()
