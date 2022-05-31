@@ -1,5 +1,6 @@
 class UserSessionsController < ApplicationController
   skip_before_action :require_login
+  layout 'layouts/application_admin'
   
   def new; end
 
@@ -8,6 +9,7 @@ class UserSessionsController < ApplicationController
     if @user
       redirect_back_or_to rails_admin_path
     else
+      flash.now[:danger] = 'ログインに失敗しました。'
       render :new
     end
   end

@@ -22,10 +22,12 @@ module ScrapingModule
   def scrape_rake(search_conditions)
     driver = Selenium::WebDriver.for :chrome, capabilities: [OPTIONS]
     # :timeoutオプションは秒数を指定している。この場合は100秒
-    wait = Selenium::WebDriver::Wait.new(timeout: 4)
+    wait = Selenium::WebDriver::Wait.new(timeout: 100)
     search_conditions.each do |search_condition|
+      print("検索:#{search_condition.keyword}\n")
       get(driver, wait, search_condition)
     rescue Selenium::WebDriver::Error::TimeoutError => e
+      print("Timeout検索キーワード：#{search_condition.keyword}\n")
       # debugger
       Rails.logger.debug "Timeout検索キーワード：#{search_condition.keyword}"
       Rails.logger.error e

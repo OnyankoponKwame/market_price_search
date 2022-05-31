@@ -15,7 +15,9 @@ window.bootstrap = require("bootstrap")
 
 document.addEventListener("DOMContentLoaded", () => {
   const app = createApp(App);
-  app.mount("#vue-app")
+  if(document.getElementById("vue-app") != null){
+    app.mount("#vue-app")
+  }
 });
 
 Rails.start()
