@@ -33,7 +33,7 @@ interface MyObj {
   name: string
   price: string
   search_condition_id: number
-  sold: string
+  sales_status: string
   updated_at: string
   url: string
 }
@@ -159,11 +159,11 @@ export default defineComponent({
         tooltip.dataPoints.forEach((dataPoint, i) => {
           let price = dataPoint.parsed.y
           let date = dataPoint.raw.x
-          let sold = dataPoint.dataset.label
+          let sales_status = dataPoint.dataset.label
 
           let filtered_array = items_array.filter(
             (data) =>
-              data.price === price && data.updated_at.slice(0, 10) === date && data.sold === sold
+              data.price === price && data.updated_at.slice(0, 10) === date && data.sales_status === sales_status
           )
           filtered_array.forEach((item) => {
             // 同じ価格のアイテムを順番に処理するため重複チェック
@@ -262,7 +262,7 @@ export default defineComponent({
         (data) =>
           data.price === price &&
           data.updated_at.slice(0, 10) === date &&
-          data.sold === context.dataset.label
+          data.sales_status === context.dataset.label
       );
       label += filtered_array
         .map((x) => x.name)

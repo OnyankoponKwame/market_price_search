@@ -116,14 +116,13 @@
       </div>
       <!-- チャート部分 -->
       <div class="col-md">
-        <div v-if="isError" class="text-center text-danger">エラー{{ response_message }}</div>
+        <div v-if="response_message" :class="message_type">{{ response_message }}</div>
         <div v-else-if="isLoading" class="text-center text-secondary">
           <div class="spinner-border spinner-border-sm" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
           読み込み中...
         </div>
-        <div v-else-if="result_message" class="text-center text-success">{{ result_message }}</div>
         <div v-else-if="history_display_flag">
           <div v-for="search_condition in search_condition_array" :key="search_condition.keyword" class="border-bottom col-md-9 offset-md-2">
             <div class="d-flex">
@@ -150,10 +149,10 @@
         </div>
         <div v-else>
           <Suspense>
-            <ScatterChart :key="resetKey" v-if="resetFlag" :keyword="keyword" :sale_array="sale_array" :sold_array="sold_array" :items="items" />
+            <ScatterChart v-if="chart_display_flag" :keyword="keyword" :sale_array="sale_array" :sold_array="sold_array" :items="items" />
           </Suspense>
           <Suspense>
-            <BarChart :key="resetKey" v-if="resetFlag" :keyword="keyword" :data_array="data_array" :label_array="label_array" />
+            <BarChart v-if="chart_display_flag" :keyword="keyword" :data_array="data_array" :label_array="label_array" />
           </Suspense>
         </div>
       </div>
@@ -173,8 +172,7 @@ export default {
   },
 
   setup() {
-    let resetFlag = ref(false)
-    let resetKey = ref(0)
+    let chart_display_flag = ref(false)
     let keyword = ref('')
     let price_min = ref('')
     let price_max = ref('')
@@ -186,11 +184,10 @@ export default {
     let label_array = ref([])
     let items = ref([])
     let isLoading = ref(false)
-    let isError = ref(false)
     let response_message = ref('')
-    let result_message = ref('')
     let search_condition_array = reactive([])
     let history_display_flag = ref(false)
+    let message_type = ref('')
 
     function Initialization() {
       let localSt = localStorage.getItem('search_conditions')
@@ -206,66 +203,75 @@ export default {
         history_display_flag.value = false
       } else {
         history_display_flag.value = true
+        response_message.value = ''
+        isLoading.value = false
+        chart_display_flag.value = false
       }
     }
     const updateChart = async (search_condition = '') => {
-      result_message.value = ''
-      if (keyword.value.trim() || search_condition) {
-        isLoading.value = true
-        // 引数が設定されている場合（検索履歴）そちらのデータで検索
-        if (search_condition) {
-          keyword.value = search_condition.keyword
-          price_min.value = search_condition.price_min
-          price_max.value = search_condition.price_max
-          negative_keyword.value = search_condition.negative_keyword
-          include_title_flag.value = search_condition.include_title_flag
-        }
-        let params = {
-          keyword: keyword.value,
-          price_min: price_min.value,
-          price_max: price_max.value,
-          negative_keyword: negative_keyword.value,
-          include_title_flag: include_title_flag.value
-        }
-        price_min.value > price_max.value
-
-        // Localstorage
-        // 検索履歴に同じ条件あった場合は追加しない
-        if (!toRaw(search_condition_array).some((e) => JSON.stringify(e) === JSON.stringify(params))) {
-          search_condition_array.push(params)
-          localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
-        }
-        let query = new URLSearchParams(params)
-        sale_array.value = []
-        sold_array.value = []
-        data_array.value = []
-        label_array.value = []
-        items.value = []
-        const res = await fetch(`/api/v1/items?${query}`)
-        if (checkresponse(res)) {
-          return
-        }
-        const json = await res.json()
-        for (let elem of json['sale_array']) {
-          let x = elem[0]
-          let y = elem[1]
-          sale_array.value.push({ x: x, y: y })
-        }
-        for (let elem of json['sold_array']) {
-          let x = elem[0]
-          let y = elem[1]
-          sold_array.value.push({ x: x, y: y })
-        }
-        data_array.value = json['data_array']
-        label_array.value = json['label_array']
-        items.value = JSON.parse(json['items'])
-        isLoading.value = false
-        history_display_flag.value = false
-        resetFlag.value = true
-        resetKey.value++
-      } else {
-        resetFlag.value = false
+      if (keyword.value.trim() == '' && !search_condition) {
+        return
       }
+      isLoading.value = true
+      // 引数が設定されている場合（検索履歴）そちらのデータで検索
+      if (search_condition) {
+        keyword.value = search_condition.keyword
+        price_min.value = search_condition.price_min
+        price_max.value = search_condition.price_max
+        negative_keyword.value = search_condition.negative_keyword
+        include_title_flag.value = search_condition.include_title_flag
+      }
+      let params = {
+        keyword: keyword.value,
+        price_min: price_min.value,
+        price_max: price_max.value,
+        negative_keyword: negative_keyword.value,
+        include_title_flag: include_title_flag.value
+      }
+      price_min.value > price_max.value
+
+      // Localstorage
+      // 検索履歴に同じ条件あった場合は追加しない
+      if (!toRaw(search_condition_array).some((e) => JSON.stringify(e) === JSON.stringify(params))) {
+        search_condition_array.push(params)
+        localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
+      }
+      let query = new URLSearchParams(params)
+      sale_array.value = []
+      sold_array.value = []
+      data_array.value = []
+      label_array.value = []
+      items.value = []
+
+      const res = await fetch(`/api/v1/items?${query}`)
+      if (checkresponse(res)) {
+        // OKじゃなければreturn
+        isLoading.value = false
+        return
+      }
+      const json = await res.json()
+      if(json['message']){
+        response_message.value = json['message']
+        message_type.value = "text-center text-info"
+        return
+      }
+
+      for (let elem of json['sale_array']) {
+        let x = elem[0]
+        let y = elem[1]
+        sale_array.value.push({ x: x, y: y })
+      }
+      for (let elem of json['sold_array']) {
+        let x = elem[0]
+        let y = elem[1]
+        sold_array.value.push({ x: x, y: y })
+      }
+      data_array.value = json['data_array']
+      label_array.value = json['label_array']
+      items.value = JSON.parse(json['items'])
+      isLoading.value = false
+      history_display_flag.value = false
+      chart_display_flag.value = true
     }
 
     const postChart = async () => {
@@ -280,14 +286,15 @@ export default {
         },
         body: JSON.stringify(params)
       })
+      const json = await res.json()
       if (checkresponse(res)) {
         return
       }
-      const json = await res.json()
+      message_type.value = "text-center text-success"
       if (json['cron_flag']) {
-        result_message.value = '定期実行を登録しました。'
+        response_message.value = '定期実行を登録しました。'
       } else {
-        result_message.value = '定期実行を解除しました。'
+        response_message.value = '定期実行を解除しました。'
       }
     }
 
@@ -304,13 +311,13 @@ export default {
 
     function checkresponse(res) {
       if (!res.ok) {
-        response_message.value = ' ' + res.status + ':' + res.statusText
+        response_message.value = res.status + ':' + res.statusText
+        message_type.value = 'text-center text-danger'
         console.log(response_message.value)
-        isError.value = true
       } else {
-        isError.value = false
+        response_message.value = ''
       }
-      return isError.value
+      return !res.ok
     }
 
     function clearInput() {
@@ -328,7 +335,7 @@ export default {
 
     onMounted(() => {
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+      const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
     })
 
     return {
@@ -342,19 +349,17 @@ export default {
       price_max,
       negative_keyword,
       include_title_flag,
-      resetFlag,
-      resetKey,
+      chart_display_flag,
       sale_array,
       sold_array,
       data_array,
       label_array,
       items,
       isLoading,
-      isError,
       response_message,
-      result_message,
       search_condition_array,
-      history_display_flag
+      history_display_flag,
+      message_type
     }
   }
 }

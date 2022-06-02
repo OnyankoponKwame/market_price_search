@@ -2,9 +2,8 @@ class Api::V1::ItemsController < ApiController
   include ScrapingModule
   require './app/commonclass/item_resource'
 
-  # ActiveRecordのレコードが見つからなければ404 not foundを応答する
   rescue_from ActiveRecord::RecordNotFound do |_exception|
-    render json: { error: '404 not found' }, status: 404
+    head :not_found
   end
 
   def index
@@ -15,15 +14,22 @@ class Api::V1::ItemsController < ApiController
     negative_keyword = params[:negative_keyword]
     include_title_flag = params[:include_title_flag]
 
-    search_word = 'ブラッキー SA'
+    # search_word = 'ブラッキー SA'
     search_condition = SearchCondition.find_by(keyword: search_word)
+    nothing_flag = false
+    result = true
     if search_condition
       # その日に検索されていたら検索しない
-      scrape(search_condition) unless search_condition.updated_at >= Time.zone.now.beginning_of_day
+      result, nothing_flag = scrape(search_condition) unless search_condition.updated_at >= Time.zone.now.beginning_of_day
     else
-      search_condition = SearchCondition.create(keyword: search_word)
-      scrape(search_condition)
+      search_condition = SearchCondition.new(keyword: search_word)
+      result, nothing_flag = scrape(search_condition)
+      # エラーでなく出品ありの場合のみ保存
+      search_condition.save if result && !nothing_flag
     end
+
+    return render json: { message: '出品された商品がありません' }, status: :ok if nothing_flag
+    return head :not_found unless result
 
     items = search_condition.items
 

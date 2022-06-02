@@ -4,10 +4,13 @@
 require File.expand_path(File.dirname(__FILE__) + '/environment')
 
 # rake用job_typeの再定義
-set :job_template, "/bin/zsh -l -c ':job'"
+# set :job_template, "/bin/zsh -l -c ':job'"
 # .zshrcとrbenvのパスを指定するrakeを定義
-job_type :rake, 'source $HOME/.zshrc; cd :path && RAILS_ENV=:environment bundle exec rake :task :output'
+job_type :rake, 'cd :path && RAILS_ENV=:environment bundle exec rake :task :output'
 # job_type :rake, 'source $HOME/.zshrc; exportPATH =\"$HOME/.rbenv/bin:$PATH\"; cd :path && RAILS_ENV=:environment bundle exec rake :task :output'
+
+# 環境変数をうまい感じにやってくれる
+ENV.each { |k, v| env(k, v) }
 
 # cronを実行する環境変数(:development, :product, :test)
 # 環境変数'RAILS_ENV'にセットされている変数またはdevelopmentを指定
@@ -18,10 +21,10 @@ rails_env = ENV['RAILS_ENV'] || :development
 set :environment, rails_env
 
 # cronのログの吐き出し場所
-set :output, "#{Rails.root}/log/cron.log"
+set :output, error: "#{Rails.root}/log/cron_error.log", standard: "#{Rails.root}/log/cron.log"
 
 # test
-# every 10.minute do
+# every 1.minute do
 #   rake 'items:update_items'
 # end
 
