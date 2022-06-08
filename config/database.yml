@@ -5,13 +5,20 @@
 #   gem 'sqlite3'
 #
 default: &default
-  adapter: sqlite3
+  adapter: mysql2
+  encoding: utf8mb4
+  charset: utf8mb4
+  collation: utf8mb4_general_ci
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
+  username: root
+  password: <%= ENV["MYSQL_ROOT_PASSWORD"] %>
+  socket: /tmp/mysql.sock
+  host: db
 
 development:
   <<: *default
-  database: db/development.sqlite3
+  database: frimachart_development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -22,4 +29,7 @@ test:
 
 production:
   <<: *default
-  database: db/production.sqlite3
+  database: service1_db
+  host: localhost
+  username: ENV['DB_USERNAME']
+  password: ENV['DB_PASSWORD']
