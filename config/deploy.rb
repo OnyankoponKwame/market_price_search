@@ -6,10 +6,25 @@ set :repo_url, 'https://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:@github.com/Ony
 set :deploy_to, "/var/www/html/frimachart"
 set :branch, 'main'
 
+set :rbenv_type, :user
+set :rbenv_ruby, '3.1.2'
+# set :rbenv_custom_path, '~/.rbenv'
+set :puma_service_unit_name, 'puma.service'
+
 append :linked_dirs, '.bundle'
+
 
 append :linked_files, "config/database.yml", "config/master.key", '.env'
 append :linked_dirs, ".bundle", "log", "tmp/pids", "tmp/cache", "tmp/sockets"
+
+# namespace :deploy do
+#   task :puma_restart_again do
+#     invoke  'puma:stop'
+#     invoke! 'puma:start'
+#   end
+# end
+
+# after 'puma:restart', 'deploy:puma_restart_again'
 
 # set :rbenv_type, :system
 # set :rbenv_ruby, '3.1.2'

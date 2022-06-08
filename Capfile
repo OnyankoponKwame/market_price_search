@@ -11,8 +11,9 @@ require "capistrano/bundler"
 require "capistrano/rails/migrations"
 
 require "capistrano/puma"
+# Install puma plugins
 install_plugin Capistrano::Puma
-
+install_plugin Capistrano::Puma::Systemd
 # Load the SCM plugin appropriate to your project:
 #
 # require "capistrano/scm/hg"
@@ -36,7 +37,6 @@ install_plugin Capistrano::SCM::Git
 #   https://github.com/capistrano/passenger
 #
 # require "capistrano/rvm"
-# require "capistrano/rbenv"
 # require "capistrano/chruby"
 # require "capistrano/bundler"
 # require "capistrano/rails/assets"
