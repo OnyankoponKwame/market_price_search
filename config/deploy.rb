@@ -13,7 +13,6 @@ set :puma_service_unit_name, 'puma.service'
 
 append :linked_dirs, '.bundle'
 
-
 append :linked_files, "config/database.yml", "config/master.key", '.env'
 append :linked_dirs, ".bundle", "log", "tmp/pids", "tmp/cache", "tmp/sockets"
 

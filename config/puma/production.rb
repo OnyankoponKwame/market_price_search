@@ -1,5 +1,5 @@
 # bind "unix://#{Rails.root.join('tmp/sockets/puma.sock')}"だとpumactlコマンドで読み込まないため絶対パスで指定
-root_dir = '/var/www/frimachart/current'
+root_dir = '/var/www/frimachart/shared'
 
 max_threads_count = ENV.fetch('RAILS_MAX_THREADS', 5)
 min_threads_count = ENV.fetch('RAILS_MIN_THREADS', max_threads_count)
@@ -7,7 +7,8 @@ threads min_threads_count, max_threads_count
 
 worker_timeout 60
 
-bind "unix://#{root_dir}/tmp/sockets/puma.sock"
+# bind "unix://#{root_dir}/tmp/sockets/puma.sock"
+bind "unix:///var/www/html/frimachart/shared/tmp/sockets"
 
 environment 'production'
 
