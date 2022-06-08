@@ -8,7 +8,7 @@ set :branch, 'main'
 
 append :linked_dirs, '.bundle'
 
-append :linked_files, "config/database.yml", "config/master.key"
+append :linked_files, "config/database.yml", "config/master.key", '.env'
 append :linked_dirs, ".bundle", "log", "tmp/pids", "tmp/cache", "tmp/sockets"
 
 # set :rbenv_type, :system
