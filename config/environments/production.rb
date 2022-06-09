@@ -6,7 +6,9 @@ Rails.application.configure do
   # Code is not reloaded between requests.
   config.cache_classes = true
 
-  config.consider_all_requests_local       = true #デフォルトはfalseになっている
+  config.hosts << 'frimachart.com'
+
+  config.consider_all_requests_local = true
   
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
