@@ -9,8 +9,8 @@ module ScrapingModule
   def init
     options = Selenium::WebDriver::Chrome::Options.new
     options.add_argument('--headless')
-    Selenium::WebDriver.for :remote, url: 'http://chrome:4444/wd/hub', capabilities: [options]
-    # Selenium::WebDriver.for :chrome, capabilities: [options]
+    # Selenium::WebDriver.for :remote, url: 'http://chrome:4444/wd/hub', capabilities: [options]
+    Selenium::WebDriver.for :chrome, capabilities: [options]
   end
 
   def scrape(search_condition)
