@@ -3,8 +3,7 @@ module ScrapingModule
   extend ActiveSupport::Concern
   require 'selenium-webdriver'
 
-  BASE_URL = 'https://www.mercari.com/jp/search/?sort_order=&keyword='
-  BASE_URL.freeze
+  BASE_URL = 'https://www.mercari.com/jp/search/?sort_order=&keyword='.freeze
 
   def init
     options = Selenium::WebDriver::Chrome::Options.new

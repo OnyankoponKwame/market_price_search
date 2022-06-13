@@ -33,8 +33,6 @@ production:
   <<: *default
   database: service1_db
   host: localhost
-  # username: dbuser
-  # password: K3av9/si
   username: <%= ENV['DB_USERNAME'] %>
   password: <%= ENV['DB_PASSWORD'] %>
   

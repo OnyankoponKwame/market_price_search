@@ -1,7 +1,7 @@
 class UserSessionsController < ApplicationController
   skip_before_action :require_login
   layout 'layouts/application_admin'
-  
+
   def new; end
 
   def create
