@@ -1,4 +1,4 @@
 class SearchCondition < ApplicationRecord
   has_many :items, dependent: :destroy
-  validates :keyword, presence: true, uniqueness: true
+  validates :keyword, uniqueness: { scope: %i[price_min price_max] }
 end

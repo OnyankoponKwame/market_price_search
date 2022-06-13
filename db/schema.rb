@@ -12,28 +12,28 @@
 
 ActiveRecord::Schema.define(version: 2022_06_01_010234) do
 
-  create_table "items", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "items", force: :cascade do |t|
     t.string "name", null: false
     t.integer "price", null: false
     t.integer "sales_status", null: false
     t.string "url", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "search_condition_id"
+    t.integer "search_condition_id"
     t.index ["search_condition_id"], name: "index_items_on_search_condition_id"
   end
 
-  create_table "search_conditions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "search_conditions", force: :cascade do |t|
     t.string "keyword", null: false
     t.integer "price_min"
     t.integer "price_max"
     t.boolean "cron_flag", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["keyword"], name: "index_search_conditions_on_keyword", unique: true
+    t.index ["keyword", "price_min", "price_max"], name: "index_search_conditions_on_keyword_and_price_min_and_price_max", unique: true
   end
 
-  create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "crypted_password"
     t.string "salt"

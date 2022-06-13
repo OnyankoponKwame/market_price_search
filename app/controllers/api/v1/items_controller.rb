@@ -13,16 +13,16 @@ class Api::V1::ItemsController < ApiController
     price_max = params[:price_max].to_i.nonzero?
     negative_keyword = params[:negative_keyword]
     include_title_flag = params[:include_title_flag]
-
+    # テスト用
     # search_word = 'ブラッキー SA'
-    search_condition = SearchCondition.find_by(keyword: search_word)
+    search_condition = SearchCondition.find_by(keyword: search_word, price_min: price_min, price_max: price_max)
     nothing_flag = false
     result = true
     if search_condition
       # その日に検索されていたら検索しない
       result, nothing_flag = scrape(search_condition) unless search_condition.updated_at >= Time.zone.now.beginning_of_day
     else
-      search_condition = SearchCondition.new(keyword: search_word)
+      search_condition = SearchCondition.new(keyword: search_word, price_min: price_min, price_max: price_max)
       result, nothing_flag = scrape(search_condition)
       # エラーでなく出品ありの場合のみ保存
       search_condition.save if result && !nothing_flag

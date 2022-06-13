@@ -3,8 +3,6 @@ module ScrapingModule
   extend ActiveSupport::Concern
   require 'selenium-webdriver'
 
-  BASE_URL = 'https://www.mercari.com/jp/search/?sort_order=&keyword='.freeze
-
   def init
     options = Selenium::WebDriver::Chrome::Options.new
     options.add_argument('--headless')
@@ -18,7 +16,7 @@ module ScrapingModule
     nothing_flag = get(driver, wait, search_condition)
     [true, nothing_flag]
   rescue Selenium::WebDriver::Error::TimeoutError => e
-    Rails.logger.debug "Timeout検索キーワード：#{search_condition.keyword}"
+    Rails.logger.debug "Timeout検索キーワード：#{search_condition}"
     Rails.logger.error e
     [false, false]
   rescue StandardError => e
@@ -33,11 +31,11 @@ module ScrapingModule
     wait = Selenium::WebDriver::Wait.new(timeout: 15)
     print(Time.current)
     search_conditions.each do |search_condition|
-      print("検索:#{search_condition.keyword}\n")
+      print("検索:#{search_condition}\n")
       get(driver, wait, search_condition)
     rescue Selenium::WebDriver::Error::TimeoutError => e
-      print("Timeout検索キーワード：#{search_condition.keyword}\n")
-      Rails.logger.debug "Timeout検索キーワード：#{search_condition.keyword}"
+      print("Timeout検索キーワード：#{search_condition}\n")
+      Rails.logger.debug "Timeout検索キーワード：#{search_condition}"
       Rails.logger.error e
       next
     rescue StandardError => e
@@ -49,7 +47,8 @@ module ScrapingModule
 
   # 出品無しの時はtrue,それ以外はfalse
   def get(driver, wait, search_condition)
-    driver.get(BASE_URL + search_condition.keyword)
+    url = "https://jp.mercari.com/search?keyword=#{search_condition.keyword}&price_min=#{search_condition.price_min}&price_max=#{search_condition.price_max}"
+    driver.get(url)
     sleep 2
     text = '出品された商品がありません'
     nothing_flag = driver.find_elements(:xpath, "//p[contains(.,'#{text}')]").present?
