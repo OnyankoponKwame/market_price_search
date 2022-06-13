@@ -2,12 +2,17 @@ class SearchConditionsController < ApplicationController
   skip_before_action :require_login
 
   def create
-    search_condition = SearchCondition.find_by(keyword: params[:keyword])
+    search_word = params[:keyword]
+    # nonzeroは0のときにnilを返し、そうでない場合は自身を返す
+    price_min = params[:price_min].to_i.nonzero?
+    price_max = params[:price_max].to_i.nonzero?
+
+    search_condition = SearchCondition.find_by(keyword: search_word, price_min: price_min, price_max: price_max)
     if search_condition
       flag = search_condition.cron_flag
-      search_condition.update(cron_flag: !flag)
+      search_condition.update!(cron_flag: !flag)
     else
-      search_condition = SearchCondition.create(keyword: params[:keyword], cron_flag: true)
+      search_condition = SearchCondition.create(keyword: search_word, price_min: price_min, price_max: price_max, cron_flag: true)
     end
     render json: { cron_flag: search_condition.cron_flag }
   end

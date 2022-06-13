@@ -6,6 +6,10 @@ module ScrapingModule
   def init
     options = Selenium::WebDriver::Chrome::Options.new
     options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--disable-infobars')
+    options.add_argument('--disable-extensions')
     # Selenium::WebDriver.for :remote, url: 'http://chrome:4444/wd/hub', capabilities: [options]
     Selenium::WebDriver.for :chrome, capabilities: [options]
   end

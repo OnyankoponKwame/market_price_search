@@ -277,7 +277,11 @@ export default {
 
     const postChart = async () => {
       if (!keyword.value.trim()) return
-      let params = { keyword: keyword.value }
+      let params = {
+        keyword: keyword.value,
+        price_min: price_min.value,
+        price_max: price_max.value
+      }
       const res = await fetch('/search_conditions', {
         method: 'POST',
         credentials: 'same-origin',
