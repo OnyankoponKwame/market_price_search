@@ -4,7 +4,7 @@
     <div class="d-md-none">
       <div class="row pt-3 d-flex">
         <div class="col-7 ps-1 g-0">
-          <img src="/public/title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
+          <img src="title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
         </div>
         <div class="col-auto ms-auto">
           <button
@@ -31,7 +31,7 @@
     <div class="d-none d-md-block">
       <div class="row pt-3">
         <div class="col-md-3 g-0">
-          <img src="/public/title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
+          <img src="~title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
         </div>
         <div class="col-md-5 offset-md-2">
           <div class="input-group">
@@ -164,6 +164,7 @@
 import ScatterChart from './components/scatterChart'
 import BarChart from './components/barChart'
 import { onMounted, ref, reactive, toRaw } from 'vue'
+import 'title-x38.jpeg';
 
 export default {
   components: {
