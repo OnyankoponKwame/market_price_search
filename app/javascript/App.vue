@@ -4,7 +4,7 @@
     <div class="d-md-none">
       <div class="row pt-3 d-flex">
         <div class="col-7 ps-1 g-0">
-          <img src="title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
+          <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
         </div>
         <div class="col-auto ms-auto">
           <button
@@ -31,7 +31,7 @@
     <div class="d-none d-md-block">
       <div class="row pt-3">
         <div class="col-md-3 g-0">
-          <img src="~title-x38.jpeg" class="img-fluid" alt="フリマチャート" />
+          <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
         </div>
         <div class="col-md-5 offset-md-2">
           <div class="input-group">
@@ -89,7 +89,7 @@
         </details>
       </div>
       <!-- PC用 -->
-      <div class="col-md-3 h-50 border rounded d-none d-md-block shiborikomi">
+      <div class="col-md-3 h-50 border rounded d-none d-md-block shiborikomi" style="width: 250px;">
         <div class="h5 pb-2 mb-3 text-dark border-bottom d-flex">
           絞り込み
           <button type="button" class="btn btn-outline-primary ms-auto py-0" v-on:click="clearInput()">クリア</button>
@@ -164,7 +164,7 @@
 import ScatterChart from './components/scatterChart'
 import BarChart from './components/barChart'
 import { onMounted, ref, reactive, toRaw } from 'vue'
-import 'title-x38.jpeg';
+// import 'title-x38.jpeg';
 
 export default {
   components: {
@@ -371,7 +371,6 @@ export default {
   background-color: rgb(250, 250, 250);
   padding: 8px;
   border-radius: 15px;
-  width: 250px;
 }
 summary {
   transition: 0.2s; /* 変化を滑らかに */
