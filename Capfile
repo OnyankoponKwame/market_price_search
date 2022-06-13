@@ -1,7 +1,6 @@
 # Load DSL and set up stages
 require "capistrano/setup"
 
-
 # Load the SCM plugin appropriate to your project:
 #
 # require "capistrano/scm/hg"
@@ -27,7 +26,6 @@ require "capistrano/puma"
 # Install puma plugins
 install_plugin Capistrano::Puma
 install_plugin Capistrano::Puma::Systemd
-install_plugin Capistrano::Puma::Nginx
 
 # Include tasks from other gems included in your Gemfile
 #

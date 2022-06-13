@@ -7,7 +7,6 @@ threads min_threads_count, max_threads_count
 
 worker_timeout 60
 
-# bind "unix://#{root_dir}/tmp/sockets/puma.sock"
 bind "unix:///var/www/html/frimachart/shared/tmp/sockets/puma.sock"
 
 environment 'production'

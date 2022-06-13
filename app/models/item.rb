@@ -11,5 +11,4 @@ class Item < ApplicationRecord
       where(price: ..price_max)
     end
   }
-  # scope :negative_keyword_excluded, ->(word) { where.not('name like ?', "%#{word}%") if word.present? }
 end
