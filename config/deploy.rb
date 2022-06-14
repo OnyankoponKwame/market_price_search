@@ -4,11 +4,14 @@ lock "~> 3.17.0"
 set :application, "frimachart"
 set :repo_url, 'https://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:@github.com/OnyankoponKwame/market_price_search.git'
 set :deploy_to, "/var/www/html/frimachart"
+
 set :branch, 'main'
 
 set :rbenv_type, :user
 set :rbenv_ruby, '3.1.2'
 set :puma_service_unit_name, 'puma.service'
+
+set :whenever_identifier, ->{ "#{fetch(:application)}_#{fetch(:stage)}" }
 
 append :linked_dirs, '.bundle'
 

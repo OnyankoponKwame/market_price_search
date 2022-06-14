@@ -23,6 +23,7 @@ require "capistrano/rails/assets"
 require "capistrano/rails/migrations"
 
 require "capistrano/puma"
+require 'whenever/capistrano'
 # Install puma plugins
 install_plugin Capistrano::Puma
 install_plugin Capistrano::Puma::Systemd
