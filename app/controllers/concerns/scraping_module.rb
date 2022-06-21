@@ -30,25 +30,6 @@ module ScrapingModule
     driver.quit
   end
 
-  def scrape_rake(search_conditions)
-    driver = init
-    wait = Selenium::WebDriver::Wait.new(timeout: 15)
-    print(Time.current)
-    search_conditions.each do |search_condition|
-      print("検索:#{search_condition}\n")
-      get(driver, wait, search_condition)
-    rescue Selenium::WebDriver::Error::TimeoutError => e
-      print("Timeout検索キーワード：#{search_condition}\n")
-      Rails.logger.debug "Timeout検索キーワード：#{search_condition}"
-      Rails.logger.error e
-      next
-    rescue StandardError => e
-      Rails.logger.error e
-      next
-    end
-    driver.quit
-  end
-
   # 出品無しの時はtrue,それ以外はfalse
   def get(driver, wait, search_condition)
     url = "https://jp.mercari.com/search?keyword=#{search_condition.keyword}&price_min=#{search_condition.price_min}&price_max=#{search_condition.price_max}&sort=created_time&order=desc"
