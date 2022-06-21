@@ -53,9 +53,6 @@ export default defineComponent({
     sold_array: {
       type: Array
     },
-    keyword: {
-      type: String
-    },
     chartId: {
       type: String,
       default: 'scatter-chart'
@@ -306,7 +303,7 @@ export default defineComponent({
       plugins: {
         title: {
           display: true,
-          // text: '直近一週間で売れている価格帯'
+          text: '日別価格散布図'
         },
         tooltip: selectTooltips()
       },

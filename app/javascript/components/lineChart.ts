@@ -1,35 +1,40 @@
 import { defineComponent, h, PropType } from 'vue'
 
-import { Bar } from 'vue-chartjs'
-
+import { Line } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   Title,
   Tooltip,
   Legend,
-  BarElement,
-  CategoryScale,
+  LineElement,
   LinearScale,
+  PointElement,
+  CategoryScale,
   Plugin
 } from 'chart.js'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  CategoryScale
+)
 
 export default defineComponent({
-  name: 'BarChart',
+  name: 'LineChart',
   components: {
-    Bar
+    Line
   },
   props: {
-    data_array: {
-      type: Array
-    },
-    label_array: {
-      type: Array
+    line_graph_data: {
+      type: Object
     },
     chartId: {
       type: String,
-      default: 'bar-chart'
+      default: 'line-chart'
     },
     width: {
       type: Number,
@@ -48,24 +53,31 @@ export default defineComponent({
       default: () => {}
     },
     plugins: {
-      type: Array as PropType<Plugin<'bar'>[]>,
+      type: Array as PropType<Plugin<'line'>[]>,
       default: () => []
     }
   },
   setup(props) {
-
-    if(props.data_array == null){
-      return
-    }
-
     const chartData = {
-      labels: props.label_array,
+      labels: props.line_graph_data.labels,
       datasets: [
         {
-          label: 'sold',
-          borderColor: 'rgb(255, 99, 132)',
-          backgroundColor: 'rgba(255, 99, 132, 0.6)',
-          data: props.data_array
+          label: '平均値',
+          borderColor: 'rgb(255, 241, 0, 0.6)',
+          backgroundColor: 'rgba(255, 241, 0)',
+          data: props.line_graph_data.average,
+        },
+        {
+          label: '中央値',
+          borderColor: 'rgb(255, 75, 0, 0.6)',
+          backgroundColor: 'rgba(255, 75, 0)',
+          data: props.line_graph_data.median,
+        },
+        {
+          label: '最頻値',
+          borderColor: 'rgb(3, 175, 122, 0.6)',
+          backgroundColor: 'rgba(3, 175, 122',
+          data: props.line_graph_data.mode,
         }
       ]
     }
@@ -73,19 +85,16 @@ export default defineComponent({
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 1.0,
-      borderWidth: 1,
-      categoryPercentage: 1.0,
       plugins: {
         title: {
           display: true,
-          text: '直近で売れている価格帯'
+          text: '価格推移'
         }
       }
     }
 
     return () =>
-      h(Bar, {
+      h(Line, {
         chartData,
         chartOptions,
         chartId: props.chartId,

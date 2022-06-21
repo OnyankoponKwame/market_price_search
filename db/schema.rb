@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_01_010234) do
+ActiveRecord::Schema.define(version: 2022_06_20_081809) do
 
   create_table "items", force: :cascade do |t|
     t.string "name", null: false
@@ -20,7 +20,18 @@ ActiveRecord::Schema.define(version: 2022_06_01_010234) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "search_condition_id"
+    t.integer "pos"
     t.index ["search_condition_id"], name: "index_items_on_search_condition_id"
+  end
+
+  create_table "line_graph_data", force: :cascade do |t|
+    t.integer "average", null: false
+    t.integer "median", null: false
+    t.integer "mode", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "search_condition_id"
+    t.index ["search_condition_id"], name: "index_line_graph_data_on_search_condition_id"
   end
 
   create_table "search_conditions", force: :cascade do |t|
@@ -30,6 +41,8 @@ ActiveRecord::Schema.define(version: 2022_06_01_010234) do
     t.boolean "cron_flag", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "negative_keyword"
+    t.boolean "include_title_flag"
     t.index ["keyword", "price_min", "price_max"], name: "index_search_conditions_on_keyword_and_price_min_and_price_max", unique: true
   end
 
@@ -43,4 +56,5 @@ ActiveRecord::Schema.define(version: 2022_06_01_010234) do
   end
 
   add_foreign_key "items", "search_conditions"
+  add_foreign_key "line_graph_data", "search_conditions"
 end

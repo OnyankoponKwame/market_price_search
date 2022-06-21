@@ -4,7 +4,9 @@
     <div class="d-md-none">
       <div class="row pt-3 d-flex">
         <div class="col-7 ps-1 g-0">
-          <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
+          <a href="/">
+            <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
+          </a>
         </div>
         <div class="col-auto ms-auto">
           <button
@@ -31,7 +33,9 @@
     <div class="d-none d-md-block">
       <div class="row pt-3">
         <div class="col-md-3 g-0">
-          <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
+          <a href="/">
+            <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
+          </a>
         </div>
         <div class="col-md-5 offset-md-2">
           <div class="input-group">
@@ -89,7 +93,7 @@
         </details>
       </div>
       <!-- PC用 -->
-      <div class="col-md-3 h-50 border rounded d-none d-md-block shiborikomi" style="width: 250px;">
+      <div class="col-md-3 h-50 border rounded d-none d-md-block shiborikomi" style="width: 250px">
         <div class="h5 pb-2 mb-3 text-dark border-bottom d-flex">
           絞り込み
           <button type="button" class="btn btn-outline-primary ms-auto py-0" v-on:click="clearInput()">クリア</button>
@@ -149,10 +153,13 @@
         </div>
         <div v-else>
           <Suspense>
-            <ScatterChart v-if="chart_display_flag" :keyword="keyword" :sale_array="sale_array" :sold_array="sold_array" :items="items" />
+            <LineChart v-if="chart_display_flag" :line_graph_data="line_graph_data" />
           </Suspense>
           <Suspense>
-            <BarChart v-if="chart_display_flag" :keyword="keyword" :data_array="data_array" :label_array="label_array" />
+            <ScatterChart v-if="chart_display_flag" :sale_array="sale_array" :sold_array="sold_array" :items="items" />
+          </Suspense>
+          <Suspense>
+            <BarChart v-if="chart_display_flag" :data_array="data_array" :label_array="label_array" />
           </Suspense>
         </div>
       </div>
@@ -163,13 +170,14 @@
 <script>
 import ScatterChart from './components/scatterChart'
 import BarChart from './components/barChart'
+import LineChart from './components/lineChart'
 import { onMounted, ref, reactive, toRaw } from 'vue'
-// import 'title-x38.jpeg';
 
 export default {
   components: {
     ScatterChart,
-    BarChart
+    BarChart,
+    LineChart
   },
 
   setup() {
@@ -183,6 +191,7 @@ export default {
     let sold_array = ref([])
     let data_array = ref([])
     let label_array = ref([])
+    let line_graph_data = ref({})
     let items = ref([])
     let isLoading = ref(false)
     let response_message = ref('')
@@ -242,6 +251,7 @@ export default {
       sold_array.value = []
       data_array.value = []
       label_array.value = []
+      line_graph_data.value = {}
       items.value = []
 
       const res = await fetch(`/api/v1/items?${query}`)
@@ -251,9 +261,9 @@ export default {
         return
       }
       const json = await res.json()
-      if(json['message']){
+      if (json['message']) {
         response_message.value = json['message']
-        message_type.value = "text-center text-info"
+        message_type.value = 'text-center text-info'
         return
       }
 
@@ -269,6 +279,7 @@ export default {
       }
       data_array.value = json['data_array']
       label_array.value = json['label_array']
+      line_graph_data.value = json['line_graph_data']
       items.value = JSON.parse(json['items'])
       isLoading.value = false
       history_display_flag.value = false
@@ -295,7 +306,7 @@ export default {
       if (checkresponse(res)) {
         return
       }
-      message_type.value = "text-center text-success"
+      message_type.value = 'text-center text-success'
       if (json['cron_flag']) {
         response_message.value = '定期実行を登録しました。'
       } else {
@@ -359,6 +370,7 @@ export default {
       sold_array,
       data_array,
       label_array,
+      line_graph_data,
       items,
       isLoading,
       response_message,

@@ -51,7 +51,7 @@ module ScrapingModule
 
   # 出品無しの時はtrue,それ以外はfalse
   def get(driver, wait, search_condition)
-    url = "https://jp.mercari.com/search?keyword=#{search_condition.keyword}&price_min=#{search_condition.price_min}&price_max=#{search_condition.price_max}"
+    url = "https://jp.mercari.com/search?keyword=#{search_condition.keyword}&price_min=#{search_condition.price_min}&price_max=#{search_condition.price_max}&sort=created_time&order=desc"
     driver.get(url)
     sleep 2
     text = '出品された商品がありません'
@@ -69,12 +69,13 @@ module ScrapingModule
   end
 
   def save_items(elements, search_condition)
-    elements.each do |element|
+    elements.each_with_index do |element, i|
       item = Item.new
       item.name = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('alt').gsub('のサムネイル', '')
       item.price = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('price')
       item.url = element.find_element(:tag_name, 'a').attribute('href')
       item.sales_status = element.find_element(:tag_name, 'mer-item-thumbnail').attribute('sticker').blank? ? :sale : :sold
+      item.pos = i + 1
       search_condition.items << item
     end
     search_condition.save
