@@ -30,7 +30,7 @@ gem 'mysql2'
 gem 'rubocop'
 gem 'whenever'
 gem 'alba'
-gem 'rails_admin', ['>= 3.0.0.rc', '< 4']
+gem 'rails_admin', '~> 3.0'
 gem 'rails-i18n'
 gem 'sorcery'
 gem 'cancancan'

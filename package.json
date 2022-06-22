@@ -2,6 +2,7 @@
   "name": "market-price-search3",
   "private": true,
   "dependencies": {
+    "@babel/core": "^7.0.0-0\n",
     "@babel/preset-typescript": "^7.16.7",
     "@popperjs/core": "^2.11.5",
     "@rails/actioncable": "^6.0.0",
@@ -25,7 +26,6 @@
   },
   "version": "0.1.0",
   "devDependencies": {
-    "@vue/cli-plugin-router": "~5.0.0",
     "@vue/compiler-sfc": "^3.2.33",
     "sass": "^1.51.0",
     "webpack-dev-server": "^3"
