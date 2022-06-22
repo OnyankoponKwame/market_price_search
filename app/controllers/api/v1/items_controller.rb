@@ -9,6 +9,8 @@ class Api::V1::ItemsController < ApiController
 
   def index
     search_word = params[:keyword]
+    # 全角スペースを半角に統一
+    search_word.gsub!(/[[:space:]]/, ' ')
     # nonzeroは0のときにnilを返し、そうでない場合は自身を返す
     price_min = params[:price_min].to_i.nonzero?
     price_max = params[:price_max].to_i.nonzero?
