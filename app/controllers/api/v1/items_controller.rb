@@ -17,6 +17,8 @@ class Api::V1::ItemsController < ApiController
     # テスト用
     # search_word = 'ブラッキー SA'
     search_condition = SearchCondition.find_by(keyword: search_word, price_min:, price_max:)
+    nothing_flag = false
+    result = true
     scanned_flag = false
     if search_condition
       scanned_flag = search_condition.updated_at >= Time.zone.now.beginning_of_day
