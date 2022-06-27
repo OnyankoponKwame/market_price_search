@@ -48,6 +48,9 @@ group :development, :test do
   gem 'capistrano'
   gem 'ed25519'
   gem 'bcrypt_pbkdf'
+  gem 'rspec-rails'
+  gem 'faker'
+  gem 'factory_bot_rails'
 end
 
 group :development do

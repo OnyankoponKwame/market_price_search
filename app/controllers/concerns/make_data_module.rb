@@ -1,10 +1,9 @@
 # モジュールだよ
 module MakeDataModule
   extend ActiveSupport::Concern
+  require 'nkf'
 
   def make_line_graph_plot_data(line_graph_data)
-    hash_list = []
-    hash = {}
     label_list = []
     average_list = []
     median_list = []
@@ -15,9 +14,6 @@ module MakeDataModule
       average_list.push(u.average)
       median_list.push(u.median)
       mode_list.push(u.mode)
-      # hash['label'] = ''
-      # hash['data'] ||= []
-      # hash['data'].push u.
     end
     { labels: label_list, average: average_list, median: median_list, mode: mode_list }
   end
@@ -72,14 +68,17 @@ module MakeDataModule
     # puts "平均値:\t#{total / price_array.size}"
     # puts "中央値:\t#{median}"
     # puts "最頻値:\t#{mode}"
-    # print(hash_array)
-    # print(price_array)
     print(price_array.length)
     print(data_array.inject(:+))
 
     if type == 'line'
-      line_graph_datum = LineGraphDatum.new(average:, median:, mode:)
-      search_condition.line_graph_data << line_graph_datum
+      line_graph_datum = search_condition.line_graph_data.find_by('created_at >= ?', Time.zone.now.beginning_of_day)
+      if line_graph_datum
+        line_graph_datum.update!(average:, median:, mode:)
+      else
+        line_graph_datum = LineGraphDatum.new(average:, median:, mode:)
+        search_condition.line_graph_data << line_graph_datum
+      end
     end
     [data_array, label_array]
   end
@@ -133,14 +132,18 @@ module MakeDataModule
     flag = ActiveRecord::Type::Boolean.new.cast(include_title_flag)
     if flag
       search_word.split(/[[:blank:]]+/).each do |word|
-        return false unless item_name.include?(word)
+        return false unless full_to_half(item_name).include?(full_to_half(word))
       end
     end
     if negative_keyword.present?
       negative_keyword.split(/[[:blank:]]+/).each do |word|
-        return false if item_name.include?(word)
+        return false if full_to_half(item_name).include?(full_to_half(word))
       end
     end
     true
+  end
+
+  def full_to_half(str)
+    str.tr('０-９ａ-ｚＡ-Ｚ', '0-9a-zA-Z').downcase
   end
 end
