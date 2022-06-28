@@ -89,8 +89,8 @@ module MakeDataModule
   end
 
   def make_line_graph_data(sold_array)
-    sorted_array.select! { |elem| elem[0] >= Time.zone.now.beginning_of_day }
-    sorted_array = sold_array.sort_by { |x| x[3] }
+    sorted_array = sold_array.select { |elem| elem[0] >= Time.zone.now.beginning_of_day }
+    sorted_array.sort_by! { |x| x[3] }
     # 新着順の上位３0％のみ抽出
     slice_num = (sold_array.length * 0.3).round
     sorted_array.slice!(slice_num, sold_array.length - slice_num) if sold_array.length > 30
