@@ -6,6 +6,8 @@ class SearchConditionsController < ApplicationController
     # nonzeroは0のときにnilを返し、そうでない場合は自身を返す
     price_min = params[:price_min].to_i.nonzero?
     price_max = params[:price_max].to_i.nonzero?
+    negative_keyword = params[:negative_keyword]
+    include_title_flag = params[:include_title_flag]
 
     search_condition = SearchCondition.find_by(keyword: search_word, price_min:, price_max:)
     if search_condition

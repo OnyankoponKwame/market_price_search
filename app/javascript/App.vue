@@ -291,7 +291,9 @@ export default {
       let params = {
         keyword: keyword.value,
         price_min: price_min.value,
-        price_max: price_max.value
+        price_max: price_max.value,
+        negative_keyword: negative_keyword.value,
+        include_title_flag: include_title_flag.value
       }
       const res = await fetch('/search_conditions', {
         method: 'POST',
