@@ -10,6 +10,12 @@ module ScrapingModule
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-infobars')
     options.add_argument('--disable-extensions')
+    options.add_argument('enable-automation')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-browser-side-navigation')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--ignore-ssl-errors')
+    options.add_argument('--blink-settings=imagesEnabled=false')
     # Selenium::WebDriver.for :remote, url: 'http://chrome:4444/wd/hub', capabilities: [options]
     Selenium::WebDriver.for :chrome, capabilities: [options]
   end

@@ -121,7 +121,7 @@
       <!-- チャート部分 -->
       <div class="col-md">
         <div v-if="response_message" :class="message_type">{{ response_message }}</div>
-        <div v-else-if="isLoading" class="text-center text-secondary">
+        <div v-if="isLoading" class="text-center text-secondary">
           <div class="spinner-border spinner-border-sm" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
