@@ -138,7 +138,8 @@
                 <span v-if="search_condition.price_min">Min:¥{{ search_condition.price_min }}&nbsp;</span>
                 <span v-if="search_condition.price_max">Max:¥{{ search_condition.price_max }}&nbsp;</span>
                 <span v-if="search_condition.negative_keyword">除外:{{ search_condition.negative_keyword }}&nbsp;</span>
-                <span v-if="search_condition.include_title_flag">タイトルに含む</span>
+                <span v-if="search_condition.include_title_flag">タイトルに含む&nbsp;</span>
+                <span v-if="search_condition.cron_flag"><i class="fa-regular fa-calendar-check"></i></span>
               </div>
               <div>
                 <button type="button" class="btn btn-default" v-on:click="updateChart(search_condition)">
@@ -242,7 +243,16 @@ export default {
 
       // Localstorage
       // 検索履歴に同じ条件あった場合は追加しない
-      if (!toRaw(search_condition_array).some((e) => JSON.stringify(e) === JSON.stringify(params))) {
+      let local_search_condition = search_condition_array.find(
+        (data) =>
+          data.keyword === params.keyword &&
+          data.price_min === params.price_min &&
+          data.price_max === params.price_max &&
+          data.negative_keyword === params.negative_keyword &&
+          data.include_title_flag === params.include_title_flag
+      )
+      // if (!toRaw(search_condition_array).some((e) => JSON.stringify(e) === JSON.stringify(params))) {
+      if (!local_search_condition) {
         search_condition_array.push(params)
         localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
       }
@@ -288,6 +298,7 @@ export default {
 
     const postChart = async () => {
       if (!keyword.value.trim()) return
+
       let params = {
         keyword: keyword.value,
         price_min: price_min.value,
@@ -295,6 +306,7 @@ export default {
         negative_keyword: negative_keyword.value,
         include_title_flag: include_title_flag.value
       }
+
       const res = await fetch('/search_conditions', {
         method: 'POST',
         credentials: 'same-origin',
@@ -309,11 +321,23 @@ export default {
         return
       }
       message_type.value = 'text-center text-success'
+      let local_search_condition = search_condition_array.find(
+        (data) =>
+          data.keyword === params.keyword &&
+          data.price_min === params.price_min &&
+          data.price_max === params.price_max &&
+          data.negative_keyword === params.negative_keyword &&
+          data.include_title_flag === params.include_title_flag
+      )
       if (json['cron_flag']) {
         response_message.value = '定期実行を登録しました。'
+        local_search_condition.cron_flag = true
       } else {
         response_message.value = '定期実行を解除しました。'
+        local_search_condition.cron_flag = false
       }
+      // Localstorage
+      localStorage.setItem('search_conditions', JSON.stringify(search_condition_array))
     }
 
     const getCsrfToken = () => {
