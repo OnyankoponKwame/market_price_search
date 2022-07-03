@@ -1,5 +1,10 @@
 <template>
   <div class="container">
+    <div class="d-flex">
+      <div class="ms-auto">
+        <HelpModal />
+      </div>
+    </div>
     <!-- スマホ用 -->
     <div class="d-md-none">
       <div class="row pt-3 d-flex">
@@ -173,12 +178,14 @@ import ScatterChart from './components/scatterChart'
 import BarChart from './components/barChart'
 import LineChart from './components/lineChart'
 import { onMounted, ref, reactive, toRaw } from 'vue'
+import HelpModal from './components/HelpModal'
 
 export default {
   components: {
     ScatterChart,
     BarChart,
-    LineChart
+    LineChart,
+    HelpModal
   },
 
   setup() {
