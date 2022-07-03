@@ -1,5 +1,6 @@
 # README
-
+## ■ URL
+https://frimachart.com/
 ## ■ サービス概要
 フリマサイトで売り時が知りたい方や売れる価格が知りたい人のためのサービスです。  
 価格情報を取得して、価格推移、価格散布図、直近で売れた価格のヒストグラムを表示します。  
@@ -58,4 +59,9 @@
 自力でカスタマイズしている。
 
 ## ■ER図
-ER.png
+https://i.gyazo.com/bac61c9fc0e7bd8c20db37bf8eb32cfe.png
+
+## ■動作イメージ
+![イメージ１](https://i.gyazo.com/095bf760b077f23f0cfc3bb7f89e6ee5.gif)
+スマートフォン表示
+![イメージ2](https://i.gyazo.com/6e8ad3daf8c562360c558add82375a9c.gif)
