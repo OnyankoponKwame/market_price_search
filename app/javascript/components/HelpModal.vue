@@ -8,7 +8,7 @@
         検索条件を入力の上検索を押してください。価格推移、価格散布図、直近で売れた価格のヒストグラムがグラフで表示されます。
         <br />
         <br />
-        検索条件が入力された状態で定期実行登録ボタンを押すと、指定した検索条件で毎日1回データが収集され、価格推移を見ることができます。
+        検索条件が入力された状態で定期実行登録ボタンを押すと、指定した検索条件で毎日1回データが収集され、価格推移を追跡できます。
         <br />
         <br />
         <button @click="modalOpen = false" class="btn btn-secondary">閉じる</button>
@@ -22,7 +22,7 @@ export default {
   name: 'HelpModal',
   data() {
     return {
-      modalOpen: true
+      modalOpen: false
     }
   }
 }

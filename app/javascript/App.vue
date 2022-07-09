@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <div class="d-flex">
-      <div class="ms-auto">
-        <HelpModal />
-      </div>
-    </div>
     <!-- スマホ用 -->
     <div class="d-md-none">
+      <div class="row">
+        <div class="col-auto ms-auto">
+          <HelpModal />
+        </div>
+      </div>
       <div class="row pt-3 d-flex">
         <div class="col-7 ps-1 g-0">
           <a href="/">
@@ -42,13 +42,13 @@
             <img :src="'title-x38.jpeg'" class="img-fluid" alt="フリマチャート" />
           </a>
         </div>
-        <div class="col-md-5 offset-md-2">
+        <div class="col-md-5 offset-md-1">
           <div class="input-group">
             <input v-model="keyword" @input="historyDisplay" type="text" class="form-control" aria-describedby="button-addon2" />
             <button class="btn btn-primary" type="button" id="button-addon2" v-on:click="updateChart()">検索</button>
           </div>
         </div>
-        <div class="col-md">
+        <div class="col-md-auto">
           <button
             type="button"
             class="btn btn-outline-danger"
@@ -60,6 +60,9 @@
           >
             定期実行登録
           </button>
+        </div>
+        <div class="col-auto">
+          <HelpModal />
         </div>
       </div>
     </div>
